@@ -186,6 +186,10 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 .dlg .strip i{height:12px}
 .strip-lbl{display:grid;grid-template-columns:repeat(12,1fr);font-size:.72rem;color:var(--muted);text-align:center}
 .dlg p{margin:0}
+.rez-link{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);color:inherit;text-decoration:none}
+.rez-link:hover{border-color:var(--accent)}
+.rez-link b{display:block;color:var(--accent)}
+.rez-meta{display:block;font-size:.86rem;color:var(--muted)}
 .dlg h4{margin:0 0 2px;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 
 /* Methodik */
@@ -281,6 +285,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
     <p>Pro Grad verschiebt sich die Ernte um etwa 3 Tage, höchstens um 40 Tage. Zitrusfrüchte und andere Winterfrüchte verschieben sich kaum. Ob eine Frucht bei dir regional wächst, hängt davon ab, ob der effektive Breitengrad im Anbaubereich der Frucht liegt. Auf der Südhalbkugel werden alle Zeiten um ein halbes Jahr versetzt.</p>
     <p>Bei Gemüse zeigt die App zusätzlich, wann regionale Ware aus Gewächshaus oder Folientunnel kommt, etwa Tomaten, Gurken, Paprika und früher Salat. Wintergemüse wie Grünkohl, Lauch oder Feldsalat bleibt über den Winter auf dem Feld. In sehr kalten Regionen mit Dauerfrost ist das nur eingeschränkt möglich.</p>
     <p>Grenzen: Niederschlag, Wüsten- und Monsunklima, Mikroklima und einzelne Sorten bildet das Modell nicht ab. Für München weicht das Modell nur in 31 von 804 Monatswerten vom Bayerischen Saisonkalender ab, meist in Randmonaten oder wo sich die Kalender untereinander widersprechen. Für Deutschland, Österreich und die Schweiz sind die Angaben daher verlässlich, im übrigen Europa grob, außerhalb Europas nur eine Näherung. Wetter verschiebt die Ernte von Jahr zu Jahr um ein bis zwei Wochen.</p>
+    <p>Rezept-Tipps: Die Detailansicht verlinkt je Sorte ein Rezept von GuteKueche.at mit mindestens 4,3 Sternen und 15 Bewertungen. Geprüft wurde je Sorte nur eine Auswahl der Rezepte, es ist also ein gut bewertetes Rezept, nicht zwingend das beste. Die Bewertungen in der App haben den Stand November 2026, aktuell stehen sie auf der Rezeptseite. Die Seite ist österreichisch geprägt, dort heißt etwa die Tomate Paradeiser. Wo kein Rezept die Regel erfüllt, gibt es keinen Tipp.</p>
     <p>Die Ortssuche nutzt eine eingebaute Liste mit rund 280 Orten und allen deutschen, österreichischen und Schweizer PLZ-Regionen. Unbekannte Orte sucht sie zusätzlich online über den kostenlosen Geodienst von Open-Meteo. Dabei wird nur der eingegebene Ortsname übertragen. Alles andere funktioniert auch ohne Internet.</p>
   </details>
   <footer class="appfoot">
@@ -389,6 +394,113 @@ const USE={
  kaki:["roh","Desserts","Smoothies"],granat:["roh","Salate","Saft","Desserts"],olive:["eingelegt","Olivenöl","Tapenade"],kiwi:["roh","Müsli","Desserts"],melone:["roh","Obstsalat","mit Schinken"],
  kaktusfeige:["roh","Saft","Sirup"],wollmispel:["roh","Marmelade"],mango:["roh","Chutney","Smoothies","Currys"],banane:["roh","Backen","Smoothies"],ananas:["roh","gegrillt","Currys","Desserts"],
  papaya:["roh","grün als Salat","Smoothies"],avocado:["roh","Guacamole","Salate","Brotaufstrich"],passion:["roh","Desserts","Saft"],litschi:["roh","Desserts"],dattel:["roh","Backen","zum Süßen","gefüllt"]
+};
+/* Rezept-Tipps von gutekueche.at. Stand der Bewertungen: November 2026.
+   Regel: mindestens 4,3 Sterne und 15 Bewertungen, sonst kein Tipp. */
+const REZEPTE={
+ apfel:{"t":"Apfelmus","u":"apfelmus-rezept-2387","r":4.6,"v":21294},
+ birne:{"t":"Birnenmus","u":"birnenmus-rezept-6077","r":4.4,"v":1017},
+ quitte:{"t":"Quittenkäse","u":"quittenkaese-rezept-24365","r":4.4,"v":473},
+ mispel:{"t":"Mispelmarmelade","u":"mispelmarmelade-rezept-47651","r":4.5,"v":23},
+ suesskirsche:{"t":"Kirschkuchen","u":"kirschkuchen-rezept-9938","r":4.5,"v":12267},
+ sauerkirsche:{"t":"Weichselsoße","u":"weichselsosse-rezept-29845","r":4.6,"v":38},
+ zwetschge:{"t":"Zwetschkenfleck","u":"zwetschkenfleck-rezept-1962","r":4.5,"v":2549},
+ reneklode:{"t":"Ringlottenknödel","u":"ringlottenknodel-rezept-46663","r":5,"v":390},
+ aprikose:{"t":"Marillenwähe","u":"marillenwahe-rezept-45563","r":4.8,"v":29},
+ pfirsich:{"t":"Pfirsichkuchen","u":"pfirsichkuchen-rezept-6273","r":4.6,"v":3762},
+ erdbeere:{"t":"Erdbeereis","u":"erdbeereis-rezept-2922","r":4.4,"v":575},
+ himbeere:{"t":"Himbeersaft","u":"himbeersaft-rezept-18559","r":4.5,"v":186},
+ brombeere:{"t":"Brombeersirup","u":"brombeersirup-rezept-36603","r":4.4,"v":395},
+ rjoh:{"t":"Ribiselkuchen","u":"ribiselkuchen-rezept-6296","r":4.5,"v":93},
+ sjoh:{"t":"Schwarze Johannisbeer-Marmelade","u":"schwarze-johannisbeer-marmelade-rezept-13654","r":4.5,"v":1347},
+ stachel:{"t":"Stachelbeer Marmelade","u":"stachelbeer-marmelade-rezept-5922","r":4.5,"v":402},
+ heidel:{"t":"Heidelbeereis","u":"heidelbeereis-rezept-11717","r":4.4,"v":821},
+ traube:{"t":"Traubensaft","u":"traubensaft-rezept-37201","r":4.5,"v":130},
+ aronia:{"t":"Aroniamarmelade","u":"aroniamarmelade-rezept-8337","r":4.4,"v":1318},
+ preisel:{"t":"Preiselbeersoße","u":"preiselbeersosse-rezept-7177","r":4.4,"v":84},
+ holunder:{"t":"Hollerkoch","u":"hollerkoch-rezept-7852","r":4.3,"v":123},
+ schlehe:{"t":"Schlehensorbet","u":"schlehensorbet-rezept-1704","r":4.5,"v":22},
+ hagebutte:{"t":"Hagebutten Tee","u":"hagebutten-tee-rezept-44600","r":4.7,"v":248},
+ kornel:{"t":"Dirndlmarmelade","u":"dirndlmarmelade-rezept-8698","r":4.5,"v":539},
+ felsenbirne:{"t":"Felsenbirnen-Marmelade","u":"felsenbirnen-marmelade-rezept-37100","r":4.3,"v":42},
+ vogelbeere:{"t":"Vogelbeermarmelade","u":"vogelbeermarmelade-rezept-7523","r":4.4,"v":249},
+ walnuss:{"t":"Walnusseis","u":"walnusseis-rezept-11997","r":4.5,"v":347},
+ hasel:{"t":"Haselnussecken","u":"haselnussecken-rezept-6521","r":4.4,"v":169},
+ kastanie:{"t":"Maronisuppe","u":"maronisuppe-rezept-8269","r":4.5,"v":2470},
+ mandel:{"t":"Mandelreis","u":"mandelreis-rezept-11476","r":4.3,"v":170},
+ feige:{"t":"Feigensenf","u":"feigensenf-rezept-52604","r":4.7,"v":25},
+ orange:{"t":"Orangeneis","u":"orangeneis-rezept-16517","r":4.5,"v":26},
+ mandarine:{"t":"Mandarinenkuchen","u":"mandarinenkuchen-rezept-4959","r":4.4,"v":226},
+ zitrone:{"t":"Zitroneneis","u":"zitroneneis-rezept-13780","r":4.4,"v":684},
+ kaki:{"t":"Gefüllte Kaki","u":"gefuellte-kaki-rezept-15676","r":4.4,"v":115},
+ granat:{"t":"Granatapfelsorbet","u":"granatapfelsorbet-rezept-25656","r":4.4,"v":93},
+ olive:{"t":"Olivenbrot","u":"olivenbrot-rezept-314","r":4.6,"v":39},
+ kiwi:{"t":"Kiwi Shake","u":"kiwi-shake-rezept-18090","r":4.4,"v":1020},
+ melone:{"t":"Melonenbowle","u":"melonenbowle-rezept-18109","r":4.5,"v":1572},
+ mango:{"t":"Mango Lassi","u":"mango-lassi-rezept-6990","r":4.5,"v":3189},
+ banane:{"t":"Bananenbrot","u":"bananenbrot-rezept-3715","r":4.5,"v":8105},
+ ananas:{"t":"Ananasmus","u":"ananasmus-rezept-27982","r":4.6,"v":71},
+ papaya:{"t":"Papaya Lassi","u":"papaya-lassi-rezept-18473","r":4.7,"v":101},
+ avocado:{"t":"Avocadodip","u":"avocadodip-rezept-2899","r":4.5,"v":6479},
+ passion:{"t":"Passionsfrucht Marmelade","u":"passionsfrucht-marmelade-rezept-24945","r":4.5,"v":177},
+ litschi:{"t":"Litschi-Sorbet mit Frozen Yogurt","u":"litschi-sorbet-mit-frozen-yogurt-rezept-13340","r":4.6,"v":22},
+ dattel:{"t":"Datteln mit Speck","u":"datteln-mit-speck-rezept-297","r":4.4,"v":175},
+ blumenkohl:{"t":"Karfiolsuppe","u":"karfiolsuppe-rezept-8163","r":4.5,"v":3500},
+ brokkoli:{"t":"Brokkoli Suppe","u":"brokkoli-suppe-rezept-2747","r":4.5,"v":15462},
+ weisskohl:{"t":"Krautsalat","u":"krautsalat-rezept-31442","r":4.5,"v":330},
+ rotkohl:{"t":"Blaukraut","u":"blaukraut-rezept-6316","r":4.5,"v":8388},
+ wirsing:{"t":"Wirsingsalat","u":"wirsingsalat-rezept-11146","r":4.3,"v":1086},
+ gruenkohl:{"t":"Grünkohlsuppe","u":"grunkohlsuppe-rezept-32199","r":4.4,"v":423},
+ rosenkohl:{"t":"Kohlsprossen","u":"kohlsprossen-rezept-1591","r":4.6,"v":1510},
+ kohlrabi:{"t":"Kohlrabisuppe","u":"kohlrabisuppe-rezept-8837","r":4.5,"v":2720},
+ chinakohl:{"t":"Chinakohlsalat","u":"chinakohlsalat-rezept-6444","r":4.6,"v":4070},
+ spitzkohl:{"t":"Farfalle mit Spitzkohl","u":"farfalle-mit-spitzkohl-rezept-14195","r":4.5,"v":341},
+ pakchoi:{"t":"Pak Choi Gemüse","u":"pak-choi-gemuese-rezept-26833","r":4.4,"v":4772},
+ kartoffel:{"t":"Kartoffelsalat","u":"kartoffelsalat-rezept-815","r":4.5,"v":6293},
+ moehre:{"t":"Karottensalat","u":"karottensalat-rezept-1372","r":4.5,"v":5320},
+ rotebete:{"t":"Rote Rüben Suppe","u":"rote-rueben-suppe-rezept-3723","r":4.5,"v":3095},
+ pastinake:{"t":"Pastinakensuppe","u":"pastinakensuppe-rezept-9393","r":4.5,"v":1499},
+ petersilienwurzel:{"t":"Petersilienwurzel-Suppe","u":"petersilienwurzel-suppe-rezept-20441","r":4.7,"v":28},
+ sellerie:{"t":"Selleriesuppe","u":"selleriesuppe-rezept-3425","r":4.5,"v":6820},
+ schwarzwurzel:{"t":"Schwarzwurzelsalat","u":"schwarzwurzelsalat-rezept-30386","r":4.5,"v":678},
+ radieschen:{"t":"Radieschensuppe","u":"radieschensuppe-rezept-22196","r":4.5,"v":370},
+ rettich:{"t":"Rettichsalat","u":"rettichsalat-rezept-7111","r":4.5,"v":2079},
+ topinambur:{"t":"Topinambur-Salat","u":"topinambur-salat-rezept-5718","r":4.5,"v":120},
+ steckruebe:{"t":"Kohlrübengemüse","u":"kohlruebengemuese-rezept-12453","r":4.7,"v":43},
+ suesskartoffel:{"t":"Süßkartoffelbrei","u":"susskartoffelbrei-rezept-44580","r":4.6,"v":82},
+ meerrettich:{"t":"Krensoße","u":"krensosse-rezept-7231","r":4.6,"v":699},
+ zwiebel:{"t":"Zwiebelsuppe","u":"zwiebelsuppe-rezept-4542","r":4.6,"v":10145},
+ fruehlingszwiebel:{"t":"Jungzwiebelsuppe","u":"jungzwiebelsuppe-rezept-40652","r":4.7,"v":97},
+ lauch:{"t":"Lauchsuppe","u":"lauchsuppe-rezept-8062","r":4.5,"v":3137},
+ knoblauch:{"t":"Knoblauchsuppe","u":"knoblauchsuppe-rezept-1418","r":4.6,"v":107},
+ baerlauch:{"t":"Bärlauchsuppe","u":"baerlauchsuppe-rezept-3857","r":4.5,"v":8863},
+ schalotte:{"t":"Glasierte Schalotten","u":"glasierte-schalotten-rezept-29002","r":4.5,"v":18},
+ kopfsalat:{"t":"Kartoffelsuppe mit Kopfsalat","u":"kartoffelsuppe-mit-kopfsalat-rezept-12008","r":4.5,"v":28},
+ eisberg:{"t":"Eisbergsalat mit Joghurt","u":"eisbergsalat-mit-joghurt-rezept-17821","r":4.5,"v":2156},
+ pfluecksalat:{"t":"Blattsalat mit Thunfisch","u":"blattsalat-mit-thunfisch-rezept-9613","r":4.4,"v":33},
+ feldsalat:{"t":"Vogerlsalat mit Speck","u":"vogerlsalat-mit-speck-rezept-20977","r":4.5,"v":41},
+ spinat:{"t":"Spinat","u":"spinat-rezept-7244","r":4.6,"v":967},
+ mangold:{"t":"Mangoldspinat","u":"mangoldspinat-rezept-6915","r":4.4,"v":628},
+ rucola:{"t":"Rucolapesto","u":"rucolapesto-rezept-22855","r":4.5,"v":794},
+ endivie:{"t":"Endiviensalat","u":"endiviensalat-rezept-17657","r":4.5,"v":846},
+ chicoree:{"t":"Chicoreesalat","u":"chicoreesalat-rezept-10442","r":4.5,"v":702},
+ radicchio:{"t":"Radicchio gegrillt","u":"radicchio-gegrillt-rezept-32265","r":4.5,"v":43},
+ zuckerhut:{"t":"Zuckerhutsalat","u":"zuckerhutsalat-rezept-10313","r":4.5,"v":578},
+ tomate:{"t":"Tomatensoße","u":"tomatensosse-rezept-2429","r":4.5,"v":899},
+ gurke:{"t":"Gurkensalat","u":"gurkensalat-rezept-5974","r":4.5,"v":3297},
+ zucchini:{"t":"Zucchinisuppe","u":"zucchinisuppe-rezept-6773","r":4.5,"v":3768},
+ paprika:{"t":"Paprikasalat","u":"paprikasalat-rezept-9732","r":4.5,"v":1398},
+ aubergine:{"t":"Auberginencreme","u":"auberginencreme-rezept-11962","r":4.4,"v":471},
+ kuerbis:{"t":"Kürbissuppe","u":"kuerbissuppe-rezept-3789","r":4.4,"v":638},
+ mais:{"t":"Maissuppe","u":"maissuppe-rezept-2341","r":4.6,"v":44},
+ bohne:{"t":"Fisolensalat","u":"fisolensalat-rezept-29239","r":4.6,"v":713},
+ erbse:{"t":"Erbsensuppe","u":"erbsensuppe-rezept-7805","r":4.5,"v":2700},
+ dickebohne:{"t":"Dicke Bohnen mit Speck & Kräutern","u":"dicke-bohnen-mit-speck-und-kraeutern-rezept-1230","r":4.7,"v":24},
+ spargel:{"t":"Spargelrisotto","u":"spargelrisotto-rezept-5096","r":4.5,"v":3461},
+ rhabarber:{"t":"Rhabarber Lassi","u":"rhabarber-lassi-rezept-581","r":4.5,"v":134},
+ fenchel:{"t":"Fenchelsuppe","u":"fenchelsuppe-rezept-8271","r":4.4,"v":2639},
+ staudensellerie:{"t":"Stangensellerie überbacken","u":"stangensellerie-uberbacken-rezept-27580","r":4.5,"v":3356},
+ artischocke:{"t":"Artischockenpüree","u":"artischockenpueree-rezept-21068","r":4.7,"v":21}
 };
 const useText=id=>{const u=USE[id]||FRUITS.find(f=>f.id===id)?.u||[];return u.length?u[0].charAt(0).toUpperCase()+u[0].slice(1)+(u.length>1?" · "+u.slice(1).join(" · "):""):"";};
 
@@ -865,6 +977,11 @@ function renderCalendar(W){
 
 /* ---------- Detailansicht ---------- */
 const dlg=$("dlg");
+function rezeptBlock(id){
+  const z=REZEPTE[id];if(!z)return "";
+  const stars=z.r.toFixed(1).replace(".",",");
+  return `<div><h4>Rezept-Tipp</h4><a class="rez-link" href="https://www.gutekueche.at/${z.u}" target="_blank" rel="noopener noreferrer"><b>${esc(z.t)}</b><span class="rez-meta">${stars} von 5 Sternen, ${z.v.toLocaleString("de-DE")} Bewertungen · auf GuteKueche.at</span></a></div>`;
+}
 function openDetail(id){
   const f=FRUITS.find(x=>x.id===id);if(!f)return;
   const w=fruitWindow(f,state.loc);
@@ -892,6 +1009,7 @@ function openDetail(id){
     ${w.edge?`<p class="note">Grenzlage: An deinem Standort wächst ${esc(f.n)} nur in günstigen Lagen oder mit Schutz.</p>`:""}
     ${strip}
     <div><h4>Verwendung</h4><p>${esc(useText(f.id))}</p></div>
+    ${rezeptBlock(f.id)}
     <div><h4>Typische Sorten</h4><p>${esc(f.so)}</p></div>
     <div><h4>Tipp</h4><p>${esc(f.t)}</p></div>`;
   dlg.querySelector(".close").addEventListener("click",()=>dlg.close());

@@ -1,0 +1,19 @@
+{
+  "name": "Saisonobst & Gemüse vor Ort",
+  "short_name": "Saisonobst",
+  "description": "Welches Obst und Gemüse wächst gerade bei dir? Ort oder PLZ eingeben und die regionale Saison sehen.",
+  "lang": "de",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F6F0",
+  "theme_color": "#2E7A3A",
+  "categories": ["food", "lifestyle", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

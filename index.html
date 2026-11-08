@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Saisonobst vor Ort</title>
+<meta name="description" content="Welches Obst und Gemüse wächst gerade bei dir? Ort oder PLZ eingeben und sehen, was frisch geerntet wird, was aus Gewächshaus oder Lager kommt und was importiert wird.">
+<meta name="theme-color" content="#F3F6F0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111713" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Saisonobst">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Layout: Kopf mit Suche und Monatsleiste, darunter Hauptspalte (Karten nach Status) + Seitenspalte (Standortprofil, Anbaugebiete), dann Jahreskalender über die volle Breite */
+:root{
+  --paper:#F3F6F0; --surface:#FFFFFF; --ink:#1D2922; --muted:#5B6A60; --line:#D9E1D6;
+  --accent:#563B8C; --accent-soft:#ECE6F6; --on-accent:#FFFFFF;
+  --glass:#4E93AD;
+  --peak:#2E7A3A; --season:#86BE72; --edge:#D3E9C6; --store:#D29A2E; --store-soft:#F6E7C6; --empty:#E8EDE5;
+  --warn:#9A5B12;
+  --f-display:"Alegreya", Georgia, "Times New Roman", serif;
+  --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111713; --surface:#19211C; --ink:#E4ECE5; --muted:#98A79D; --line:#2B372F;
+  --accent:#B69DEB; --accent-soft:#2A2340; --on-accent:#1A1326;
+  --glass:#5FA6C0;
+  --peak:#62C26B; --season:#3B7D45; --edge:#24402A; --store:#D9A13A; --store-soft:#3A2F17; --empty:#212A24;
+  --warn:#E0A75A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#111713; --surface:#19211C; --ink:#E4ECE5; --muted:#98A79D; --line:#2B372F;
+  --accent:#B69DEB; --accent-soft:#2A2340; --on-accent:#1A1326;
+  --glass:#5FA6C0;
+  --peak:#62C26B; --season:#3B7D45; --edge:#24402A; --store:#D9A13A; --store-soft:#3A2F17; --empty:#212A24;
+  --warn:#E0A75A; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 48px}
+.wrap{max-width:1160px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Kopf */
+.masthead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px 40px;align-items:end;padding-block:36px 20px}
+.brand h1{font-size:clamp(2.4rem,5vw,3.6rem);font-weight:800;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.brand p{margin:6px 0 0;font-size:1.1rem;color:var(--muted);max-width:40ch}
+.search{position:relative;display:flex;flex-direction:column;gap:6px}
+.search label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.search-row{display:flex;gap:8px}
+.search input{flex:1;min-width:0;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);font-size:1.05rem}
+.search input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.btn{border:0;border-radius:var(--r);padding:12px 16px;background:var(--accent);color:var(--on-accent);font-weight:700;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.hint{font-size:.85rem;color:var(--muted);min-height:1.3em}
+.hint.err{color:var(--warn)}
+.suggest{position:absolute;top:100%;left:0;right:0;z-index:20;margin:4px 0 0;padding:4px;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 12px 30px rgba(0,0,0,.14);max-height:320px;overflow:auto}
+.suggest li{padding:8px 10px;border-radius:7px;cursor:pointer;display:flex;justify-content:space-between;gap:12px}
+.suggest li[aria-selected="true"],.suggest li:hover{background:var(--accent-soft)}
+.suggest small{color:var(--muted);white-space:nowrap}
+
+/* Monatsleiste */
+.months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.months button{border:0;background:transparent;padding:9px 0 7px;border-radius:8px;cursor:pointer;font-weight:500;position:relative}
+.months button:hover{background:var(--accent-soft)}
+.months button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:700}
+.months button.today::after{content:"";position:absolute;left:50%;bottom:3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--store)}
+
+/* Zusammenfassung */
+.summary{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;padding-block:28px 8px}
+.summary h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700}
+.counts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted)}
+.counts b{color:var(--ink);font-size:1.15rem}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:8px 4px}
+.kind{display:inline-flex;padding:3px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.kind button{border:0;background:transparent;border-radius:999px;padding:6px 16px;cursor:pointer;font-weight:500}
+.kind button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:700}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.92rem}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}
+.filters.all .chip[aria-pressed="true"]{border-color:var(--line);background:var(--surface);font-weight:400}
+
+/* Haupt-Layout */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start;padding-top:12px}
+.group{display:flex;flex-direction:column;gap:12px;padding-bottom:28px}
+.group-head{display:flex;align-items:center;gap:10px}
+.group-head h3{font-size:1.35rem}
+.group-head .count{font-size:.9rem;color:var(--muted)}
+.group-head .key{width:12px;height:12px;border-radius:3px;flex:none}
+.group p.empty{margin:0;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;text-align:left;padding:12px 14px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s, transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
+.card-name{font-weight:700;font-size:1.05rem;line-height:1.2}
+.card-meta{grid-column:1 / -1;font-size:.86rem;color:var(--muted)}
+.card-use{grid-column:1 / -1;font-size:.88rem;line-height:1.35;color:var(--ink)}
+.use-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-right:2px}
+.card .pills{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px}
+.pill{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--empty);color:var(--ink)}
+.pill.peak{background:var(--peak);color:#fff}
+.pill.season{background:var(--edge);color:var(--ink)}
+.pill.store{background:var(--store-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--store)}
+.pill.glass{background:transparent;box-shadow:inset 0 0 0 1.5px var(--glass);color:var(--ink)}
+.c-glass{background:repeating-linear-gradient(90deg,var(--glass) 0 4px,color-mix(in srgb,var(--glass) 55%,var(--surface)) 4px 5px)!important}
+.pill.edge{background:transparent;box-shadow:inset 0 0 0 1px var(--warn);color:var(--warn)}
+.strip{grid-column:1 / -1;display:grid;grid-template-columns:repeat(12,1fr);gap:2px;margin-top:6px}
+.strip i{height:7px;border-radius:2px;background:var(--empty)}
+.strip i.sel{outline:1.5px solid var(--ink);outline-offset:1px}
+.c-peak{background:var(--peak)!important}
+.c-season{background:var(--season)!important}
+.c-edge{background:var(--edge)!important}
+.c-store{background:repeating-linear-gradient(135deg,var(--store) 0 3px,var(--store-soft) 3px 6px)!important}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px 4px 8px;font-size:.9rem;cursor:pointer;color:var(--muted)}
+.tag:hover{border-color:var(--accent);color:var(--ink)}
+.tag .dot{width:9px;height:9px}
+
+/* Seitenspalte */
+aside{display:flex;flex-direction:column;gap:20px;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h3{font-size:1.15rem;margin-bottom:10px}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.loc-name{font-family:var(--f-display);font-size:1.45rem;font-weight:700;line-height:1.2;margin:2px 0 2px}
+.loc-sub{font-size:.9rem;color:var(--muted)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);font-weight:700}
+.fields input,.fields select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-weight:400;font-size:.95rem;min-width:0}
+.facts{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.93rem}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;font-weight:500}
+.gauge{margin-top:14px}
+.gauge-bar{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--store) 0%,var(--season) 50%,#7FA7C9 100%);opacity:.85}
+.gauge-mark{position:absolute;top:-4px;width:4px;height:18px;margin-left:-2px;border-radius:2px;background:var(--ink)}
+.gauge-mid{position:absolute;top:-2px;width:1px;height:14px;background:var(--surface);left:50%}
+.gauge-scale{display:flex;justify-content:space-between;font-size:.74rem;color:var(--muted);margin-top:4px}
+.note{font-size:.85rem;color:var(--warn);margin:10px 0 0}
+.regions{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.regions li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 10px}
+.regions .rn{font-weight:700}
+.regions .rd{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem;text-align:right}
+.regions .rf{grid-column:1 / -1;font-size:.86rem;color:var(--muted)}
+
+/* Kalender */
+.calendar{padding-top:16px}
+.calendar-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px 24px;margin-bottom:12px}
+.calendar-head h2{font-size:clamp(1.5rem,2.6vw,2rem)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:10px;border-radius:2px;display:inline-block;background:var(--empty)}
+.table-scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:720px}
+th,td{padding:0}
+thead th{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 8px;text-align:center;border-bottom:1px solid var(--line)}
+thead th.sel{color:var(--accent)}
+th.rowh{position:sticky;left:0;z-index:2;background:var(--surface);text-align:left;padding:0 12px;width:210px;min-width:170px;border-right:1px solid var(--line)}
+thead th.rowh{z-index:3}
+th.rowh button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:6px 0;cursor:pointer;text-align:left;font-weight:500;text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink)}
+th.rowh button:hover{color:var(--accent)}
+th.rowh .dot{width:10px;height:10px;flex:none}
+tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--paper) 45%,transparent)}
+td.cell{padding:5px 1px}
+td.cell i{display:block;height:14px;border-radius:2px;background:var(--empty)}
+td.m0 i{border-top-left-radius:4px;border-bottom-left-radius:4px}
+td.sel{background:var(--accent-soft)!important}
+td.cat-row{padding:14px 12px 4px;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700;background:var(--surface)!important}
+
+/* Dialog */
+dialog{border:0;border-radius:14px;padding:0;max-width:min(560px,calc(100vw - 32px));width:100%;background:var(--surface);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,15,12,.45)}
+.dlg{padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px}
+.dlg-head{display:flex;align-items:center;gap:12px}
+.dlg-head .dot{width:22px;height:22px}
+.dlg-head h2{font-size:1.7rem;flex:1}
+.close{border:0;background:var(--empty);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.2rem;line-height:1}
+.dlg .facts{font-size:.98rem}
+.dlg .strip{grid-template-columns:repeat(24,1fr);gap:2px}
+.dlg .strip i{height:12px}
+.strip-lbl{display:grid;grid-template-columns:repeat(12,1fr);font-size:.72rem;color:var(--muted);text-align:center}
+.dlg p{margin:0}
+.dlg h4{margin:0 0 2px;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+
+/* Methodik */
+.method{margin-top:36px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.93rem}
+.method summary{cursor:pointer;font-weight:700;color:var(--ink)}
+.method p{max-width:75ch}
+
+@media (max-width: 900px){
+  .masthead{grid-template-columns:1fr;padding-block:24px 16px}
+  .layout{grid-template-columns:1fr}
+  aside{position:static}
+}
+@media (max-width: 560px){
+  .months{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .search-row{flex-wrap:wrap}
+  .search-row input{flex-basis:100%}
+  .search-row .btn{flex:1}
+  .cards{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){ .card{transition:none} .card:hover{transform:none} }
+
+/* App-Fassung: Fußzeile */
+.appfoot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.appfoot p{max-width:75ch;margin:.4em 0}
+.appfoot a{color:var(--accent)}
+.appfoot-links{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.appfoot button{font:inherit;font-weight:700;color:var(--on-accent);background:var(--accent);border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+.appfoot button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <h1>Saison<span>obst</span> &amp; Gemüse</h1>
+      <p>Was bei dir gerade reift und wächst, was aus dem regionalen Lager kommt und was importiert wird.</p>
+    </div>
+    <div class="search">
+      <label for="q">Dein Ort</label>
+      <div class="search-row">
+        <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Ort, PLZ oder Koordinaten (48.1, 11.6)"
+               role="combobox" aria-expanded="false" aria-controls="suggest" aria-autocomplete="list">
+        <button class="btn" id="go" type="button">Anzeigen</button>
+        <button class="btn ghost" id="geo" type="button" hidden>Mein Standort</button>
+      </div>
+      <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+      <div class="hint" id="hint" aria-live="polite">Zum Beispiel „Hamburg“, „79098“, „Wien“ oder „Bozen“.</div>
+    </div>
+  </header>
+
+  <nav class="months" id="months" aria-label="Monat wählen"></nav>
+
+  <section class="summary">
+    <h2 id="title">…</h2>
+    <div class="counts num" id="counts"></div>
+  </section>
+  <div class="toolbar">
+    <div class="kind" id="kind" role="group" aria-label="Obst oder Gemüse anzeigen"></div>
+    <div class="filters" id="filters" role="group" aria-label="Kategorien filtern"></div>
+  </div>
+
+  <div class="layout">
+    <main id="main"></main>
+    <aside>
+      <section class="panel" id="profile"></section>
+      <section class="panel">
+        <h3>Anbaugebiete in deiner Nähe</h3>
+        <ul class="regions" id="regions"></ul>
+      </section>
+    </aside>
+  </div>
+
+  <section class="calendar">
+    <div class="calendar-head">
+      <div>
+        <div class="eyebrow">Jahreskalender</div>
+        <h2 id="cal-title">Regionales Obst und Gemüse</h2>
+      </div>
+      <div class="legend">
+        <span><i class="c-peak"></i>Haupternte</span>
+        <span><i class="c-season"></i>Erntezeit</span>
+        <span><i class="c-glass"></i>Gewächshaus / Folie</span>
+        <span><i class="c-store"></i>Lagerware aus der Region</span>
+        <span><i></i>keine regionale Ware</span>
+      </div>
+    </div>
+    <div class="table-scroll"><table id="cal"></table></div>
+  </section>
+
+  <details class="method">
+    <summary>Wie die Saison berechnet wird</summary>
+    <p>Grundlage sind Erntezeiten aus gängigen deutschen Saisonkalendern, bezogen auf ein mitteldeutsches Referenzklima (etwa 51,5° N in 100–200 m Höhe). Für deinen Ort rechnet die App einen „effektiven Breitengrad“ aus Breitengrad und Höhe: 122 Höhenmeter wirken etwa wie ein Breitengrad weiter nördlich (bioklimatisches Gesetz nach Hopkins). Warme Lagen wie Oberrheingraben, Weinstraße, Wachau oder Tessin werden um 1,5 Grad wärmer gerechnet, kühle Lagen um 1 Grad kühler.</p>
+    <p>Pro Grad verschiebt sich die Ernte um etwa 3 Tage, höchstens um 40 Tage. Zitrusfrüchte und andere Winterfrüchte verschieben sich kaum. Ob eine Frucht bei dir regional wächst, hängt davon ab, ob der effektive Breitengrad im Anbaubereich der Frucht liegt. Auf der Südhalbkugel werden alle Zeiten um ein halbes Jahr versetzt.</p>
+    <p>Bei Gemüse zeigt die App zusätzlich, wann regionale Ware aus Gewächshaus oder Folientunnel kommt, etwa Tomaten, Gurken, Paprika und früher Salat. Wintergemüse wie Grünkohl, Lauch oder Feldsalat bleibt über den Winter auf dem Feld. In sehr kalten Regionen mit Dauerfrost ist das nur eingeschränkt möglich.</p>
+    <p>Grenzen: Niederschlag, Wüsten- und Monsunklima, Mikroklima und einzelne Sorten bildet das Modell nicht ab. Für Deutschland, Österreich und die Schweiz sind die Angaben recht verlässlich, im übrigen Europa grob, außerhalb Europas nur eine Näherung. Wetter verschiebt die Ernte von Jahr zu Jahr um ein bis zwei Wochen.</p>
+    <p>Die Ortssuche nutzt eine eingebaute Liste mit rund 280 Orten und allen deutschen, österreichischen und Schweizer PLZ-Regionen. Unbekannte Orte sucht sie zusätzlich online über den kostenlosen Geodienst von Open-Meteo. Dabei wird nur der eingegebene Ortsname übertragen. Alles andere funktioniert auch ohne Internet.</p>
+  </details>
+  <footer class="appfoot">
+    <p><strong>Ohne Gewähr:</strong> Die Erntezeiten sind aus Saisonkalendern und einem einfachen Klimamodell geschätzt. Vor Ort und von Jahr zu Jahr können sie abweichen.</p>
+    <p>Online-Ortssuche: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo.com</a> (CC BY 4.0), Ortsdaten von <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0). Schriften: Alegreya und Alegreya Sans (SIL Open Font License), lokal eingebunden.</p>
+    <p class="appfoot-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><button type="button" id="install" hidden>App installieren</button><span id="appstate" aria-live="polite"></span></p>
+  </footer>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-title"><div class="dlg" id="dlg-body"></div></dialog>
+
+<script>
+"use strict";
+/* ---------- Kalender-Grundlagen ---------- */
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const MSHORT=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+const MD=[31,28,31,30,31,30,31,31,30,31,30,31];
+const CUM=[0,31,59,90,120,151,181,212,243,273,304,334];
+const REF=51.5;
+const mod=x=>((Math.round(x)%365)+365)%365;
+const d0=s=>{const [m,d]=s.split("-").map(Number);return CUM[m-1]+d-1;};
+const inRange=(d,a,b)=>mod(d-a)<=mod(b-a);
+function monthOf(d){d=mod(d);let m=11;while(CUM[m]>d)m--;return m;}
+function fmt(d){d=mod(d);const m=monthOf(d);const day=d-CUM[m]+1;return (day<=10?"Anfang ":day<=20?"Mitte ":"Ende ")+MONTHS[m];}
+
+/* ---------- Obst-Datenbank ----------
+ h: [Erntebeginn, Beginn Haupternte, Ende Haupternte, Ernteende] im Referenzklima (MM-TT)
+ r: [min, max] effektiver Breitengrad, in dem die Frucht regional angebaut wird
+ st: Tage Lagerware nach Ernteende, ref: Referenz-Breitengrad der Erntedaten, s: Verschiebungsfaktor
+ y: ganzjährig (pk: Hauptsaison), o: typische Herkunft */
+const CAT={kern:"Kernobst",stein:"Steinobst",beere:"Beeren & Trauben",wild:"Wildobst",nuss:"Nüsse",sued:"Südfrüchte",tropen:"Tropenfrüchte",
+ kohl:"Kohl",wurzel:"Wurzeln & Knollen",zwiebel:"Zwiebel & Lauch",blatt:"Blattgemüse & Salat",frucht:"Fruchtgemüse & Kürbis",huelse:"Hülsenfrüchte",spross:"Spargel, Rhabarber & Co."};
+const KINDS={obst:["kern","stein","beere","wild","nuss","sued","tropen"],gemuese:["kohl","wurzel","zwiebel","blatt","frucht","huelse","spross"]};
+KINDS.alle=[...KINDS.obst,...KINDS.gemuese];
+const KIND_LABEL={alle:"Beides",obst:"Obst",gemuese:"Gemüse"};
+const KIND_NOUN={alle:"Obst und Gemüse",obst:"Obst",gemuese:"Gemüse"};
+const FRUITS=[
+ {id:"apfel",n:"Apfel",k:"kern",c:"#C8372D",h:["08-01","09-01","10-20","11-10"],st:190,r:[34,63],so:"Elstar, Boskoop, Jonagold, Braeburn, Topaz, Gala, Cox Orange, Holsteiner Cox, Santana",t:"Aus kontrollierter Lagerung gibt es regionale Äpfel bis in den Frühsommer. Kühl und getrennt von anderem Obst lagern, denn Äpfel geben Ethylen ab und lassen Nachbarn schneller reifen."},
+ {id:"birne",n:"Birne",k:"kern",c:"#B3B23A",h:["08-01","08-25","10-05","10-31"],st:100,r:[34,60],so:"Williams Christ, Conference, Alexander Lucas, Gute Luise, Clapps Liebling",t:"Viele Sorten werden hart gepflückt und reifen bei Zimmertemperatur in wenigen Tagen nach."},
+ {id:"quitte",n:"Quitte",k:"kern",c:"#E0B42F",h:["09-25","10-05","10-31","11-10"],st:60,r:[35,55],so:"Konstantinopeler Apfelquitte, Bereczki, Portugiesische Birnenquitte",t:"Roh kaum essbar, ideal für Gelee, Mus und Quittenbrot. Den Flaum vor dem Kochen abreiben."},
+ {id:"mispel",n:"Mispel",k:"kern",c:"#8A5A35",fr:1,h:["10-20","11-01","11-30","12-15"],st:30,r:[38,53],so:"Holländische Großfrüchtige, Westerveld",t:"Erst nach Frost oder längerem Lagern weich und dann süß-säuerlich."},
+ {id:"suesskirsche",n:"Süßkirsche",k:"stein",c:"#9E1B32",h:["06-01","06-15","07-15","08-05"],r:[35,58],so:"Burlat, Kordia, Regina, Hedelfinger, Schneiders Späte Knorpelkirsche",t:"Kirschen reifen nicht nach. Mit Stiel kaufen und ungewaschen im Kühlschrank lagern, dann halten sie zwei bis drei Tage."},
+ {id:"sauerkirsche",n:"Sauerkirsche",k:"stein",c:"#C0283C",h:["07-01","07-10","07-31","08-15"],r:[38,62],so:"Schattenmorelle, Morina, Achat, Safir",t:"Zum Backen, Einkochen und für Saft. Die Schattenmorelle ist die klassische Sorte."},
+ {id:"zwetschge",n:"Pflaume & Zwetschge",k:"stein",c:"#4B3A7A",h:["07-20","08-15","09-20","10-15"],r:[36,60],so:"Bühler Frühzwetschge, Cacaks Schöne, Hanita, Presenta, Hauszwetschge",t:"Zwetschgen sind länglicher und fester als runde Pflaumen und behalten beim Backen ihre Form."},
+ {id:"mirabelle",n:"Mirabelle",k:"stein",c:"#E8B923",h:["08-01","08-10","08-31","09-15"],r:[40,56],so:"Mirabelle von Nancy, Mirabelle von Metz",t:"Klein, gelb und sehr süß. Lothringen ist das bekannteste Anbaugebiet."},
+ {id:"reneklode",n:"Reneklode",k:"stein",c:"#8DB04A",h:["07-25","08-01","08-25","09-10"],r:[39,56],so:"Große Grüne Reneklode, Oullins Reneklode, Graf Althans",t:"Grüne bis goldgelbe Pflaumenart, sehr saftig und aromatisch."},
+ {id:"aprikose",n:"Aprikose (Marille)",k:"stein",c:"#F08A3C",h:["07-01","07-10","07-31","08-20"],r:[34,51],so:"Wachauer Marille (Klosterneuburger), Bergeron, Hargrand, Orangered",t:"Braucht warme Lagen und ist spätfrostgefährdet. In Österreich heißt sie Marille."},
+ {id:"pfirsich",n:"Pfirsich & Nektarine",k:"stein",c:"#F4A06B",h:["07-20","08-01","08-31","09-20"],r:[33,50.5],so:"Roter Weinbergpfirsich, Redhaven, Benedicte, Revita",t:"Weinbergpfirsiche sind klein und rotfleischig. Sie werden vor allem zu Marmelade und Likör verarbeitet."},
+ {id:"erdbeere",n:"Erdbeere",k:"beere",c:"#E0323C",h:["05-20","06-01","06-30","07-20"],r:[30,66],so:"Clery, Elsanta, Malwina, Sonata, Korona, Mieze Schindler",t:"Freilandware gibt es ab Ende Mai. Folientunnel und mehrmals tragende Sorten verlängern die Saison bis in den Herbst."},
+ {id:"himbeere",n:"Himbeere",k:"beere",c:"#D6336C",h:["06-20","07-01","07-31","10-15"],r:[36,65],so:"Tulameen, Glen Ample, Autumn Bliss, Polka",t:"Sommerhimbeeren tragen im Juli, Herbsthimbeeren bis zum ersten Frost."},
+ {id:"brombeere",n:"Brombeere",k:"beere",c:"#3A2440",h:["07-20","08-01","09-10","10-05"],r:[34,58],so:"Loch Ness, Theodor Reimers, Navaho, Thornfree",t:"Nur vollreif pflücken, Brombeeren reifen nicht nach."},
+ {id:"rjoh",n:"Rote Johannisbeere",k:"beere",c:"#D7263D",h:["06-20","07-01","07-25","08-10"],r:[40,66],so:"Jonkheer van Tets, Rovada, Rolan, Weiße Versailler",t:"Ganze Rispen ernten und die Beeren erst kurz vor der Verwendung abstreifen."},
+ {id:"sjoh",n:"Schwarze Johannisbeere",k:"beere",c:"#2B1B30",h:["06-25","07-05","07-25","08-10"],r:[40,66],so:"Titania, Ometa, Ben Lomond",t:"Sehr reich an Vitamin C. Herb im Geschmack, gut für Saft und Gelee."},
+ {id:"stachel",n:"Stachelbeere",k:"beere",c:"#9CBF5A",h:["06-15","06-25","07-20","08-05"],r:[41,64],so:"Invicta, Hinnonmäki Rot, Pax",t:"Unreif grün geerntet zum Backen, vollreif süß zum Naschen."},
+ {id:"heidel",n:"Heidelbeere",k:"beere",c:"#3E4F9E",h:["07-01","07-15","08-25","09-20"],r:[35,68],so:"Duke, Bluecrop, Elliott, Reka",t:"Kulturheidelbeeren sind innen hell. Wilde Waldheidelbeeren sind kleiner und färben stark."},
+ {id:"traube",n:"Weintraube",k:"beere",c:"#7A4C8F",h:["08-20","09-10","10-15","10-31"],r:[33,52.2],so:"Tafeltrauben: Muscat bleu, Venus, Vanessa, Phoenix",t:"Regionale Tafeltrauben sind meist pilzwiderstandsfähige Sorten, die ohne viel Pflanzenschutz auskommen."},
+ {id:"kiwibeere",n:"Kiwibeere",k:"beere",c:"#7FA33A",h:["09-01","09-15","10-10","10-25"],r:[38,55],so:"Weiki, Issai, Ken's Red",t:"Stachelbeergroße Kiwis mit glatter, essbarer Schale. Winterhart bis etwa −25 °C."},
+ {id:"aronia",n:"Aronia",k:"beere",c:"#2E1F2A",h:["08-10","08-20","09-15","10-01"],r:[42,64],so:"Nero, Viking",t:"Herb und adstringierend, meist als Saft oder getrocknet."},
+ {id:"preisel",n:"Preiselbeere",k:"wild",c:"#B3202E",h:["08-15","09-01","09-30","10-15"],r:[44,70],so:"Wildsammlung, Kultursorten Red Pearl, Koralle",t:"Wächst wild in Nadelwäldern und Heiden. Roh herb, klassisch als Kompott."},
+ {id:"sanddorn",n:"Sanddorn",k:"wild",c:"#F28C1E",fr:1,h:["08-25","09-05","10-10","11-15"],r:[42,68],so:"Leikora, Habego, Hergo",t:"Sehr reich an Vitamin C. Wächst an Küsten und auf Sandböden, angebaut etwa in Brandenburg und Mecklenburg."},
+ {id:"holunder",n:"Holunderbeere",k:"wild",c:"#3B2A3F",h:["08-15","09-01","09-30","10-10"],r:[36,63],so:"Haschberg, Sampo, Wildsammlung",t:"Roh leicht giftig. Nur gekocht verwenden, etwa als Saft oder Suppe."},
+ {id:"schlehe",n:"Schlehe",k:"wild",c:"#3D4A7A",fr:1,h:["10-01","10-20","11-30","12-15"],r:[38,60],so:"Wildsammlung",t:"Nach dem ersten Frost weniger herb. Für Likör, Gelee und Saft."},
+ {id:"hagebutte",n:"Hagebutte",k:"wild",c:"#D2462A",fr:1,h:["09-10","09-25","10-31","11-30"],r:[36,64],so:"Hundsrose, Kartoffelrose, Wildsammlung",t:"Die Frucht der Wildrose. Für Mus und Tee Kerne und Härchen entfernen."},
+ {id:"kornel",n:"Kornelkirsche",k:"wild",c:"#B3122E",h:["08-15","08-25","09-15","09-30"],r:[38,54],so:"Jolico, Kasanlak, Wildsammlung",t:"Reife Früchte sind dunkelrot und lösen sich leicht. Säuerlich, gut für Marmelade."},
+ {id:"vogelbeere",n:"Vogelbeere",k:"wild",c:"#E0521E",fr:1,h:["09-01","09-15","10-15","10-31"],r:[40,68],so:"Mährische Eberesche (süßer), Wildsammlung",t:"Roh bitter und unbekömmlich. Gekocht als Gelee oder gebrannt als Schnaps."},
+ {id:"moltebeere",n:"Moltebeere",k:"wild",c:"#F0A24A",ref:63,h:["07-20","07-28","08-10","08-20"],r:[57,72],o:"Skandinavien",so:"Wildsammlung",t:"Wächst in Mooren Skandinaviens und ist in Finnland und Norwegen eine begehrte Wildfrucht."},
+ {id:"walnuss",n:"Walnuss",k:"nuss",c:"#8B6A43",h:["09-15","09-25","10-20","10-31"],st:240,r:[33,54],so:"Weinsberg 1, Geisenheim 139, Lara, Franquette",t:"Die grüne Schale platzt bei Reife auf. Gut getrocknet halten Walnüsse bis zum nächsten Sommer."},
+ {id:"hasel",n:"Haselnuss",k:"nuss",c:"#A3773F",h:["08-25","09-01","09-30","10-15"],st:240,r:[35,60],so:"Hallesche Riesen, Lambertsnuss, Corabel",t:"Fällt reif von selbst aus der Hülle. Trocken gelagert monatelang haltbar."},
+ {id:"kastanie",n:"Esskastanie (Marone)",k:"nuss",c:"#7A4A2A",h:["09-25","10-05","10-31","11-15"],st:60,r:[36,51],so:"Ecker, Marigoule, Bouche de Bétizac, Pfälzer Wildkastanien",t:"Wächst in milden Lagen wie Pfalz, Ortenau und Tessin. Vor dem Rösten kreuzweise einschneiden."},
+ {id:"mandel",n:"Mandel",k:"nuss",c:"#CBA77A",ref:40,h:["08-01","08-15","09-15","09-30"],st:270,r:[30,49],o:"Spanien, Italien, Kalifornien",so:"Marcona, Largueta, Pfälzer Mandelsorten",t:"In Deutschland nur in sehr milden Lagen wie an der Südlichen Weinstraße."},
+ {id:"feige",n:"Feige",k:"sued",c:"#6B3A5A",ref:40,s:.5,h:["08-01","08-20","09-30","10-15"],r:[28,49.3],o:"Mittelmeerraum",so:"Brown Turkey, Dalmatie, Ronde de Bordeaux",t:"Reife Feigen geben auf Druck leicht nach. Sie sind empfindlich und sollten schnell gegessen werden."},
+ {id:"orange",n:"Orange",k:"sued",c:"#F28C28",ref:38,s:0,h:["11-15","12-15","03-15","05-31"],r:[24,42],o:"Spanien, Italien, Griechenland",so:"Navelina, Navel Lane Late, Valencia Late, Tarocco und Moro (Blutorangen)",t:"Navel-Orangen im Winter, Valencia-Orangen bis in den Frühsommer, Blutorangen von Januar bis März."},
+ {id:"mandarine",n:"Mandarine & Clementine",k:"sued",c:"#F6A12B",ref:38,s:0,h:["10-15","11-01","01-15","02-28"],r:[25,42.5],o:"Spanien, Italien, Marokko",so:"Clemenules, Nadorcott, Satsuma, Ortanique",t:"Clementinen sind meist kernlos, Satsumas werden besonders früh reif."},
+ {id:"zitrone",n:"Zitrone",k:"sued",c:"#E8D33A",ref:38,s:0,h:["10-15","11-15","04-15","06-15"],r:[24,41],o:"Spanien, Italien, Türkei",so:"Primofiori, Verna, Femminello, Amalfi-Zitrone",t:"Hauptsaison ist der Winter. Sommerzitronen (Verdelli) ergänzen das Angebot."},
+ {id:"kaki",n:"Kaki",k:"sued",c:"#E8762C",ref:40,s:.5,h:["10-10","10-25","11-30","12-31"],r:[30,46.8],o:"Spanien, Italien",so:"Rojo Brillante (Persimon), Tipo, Fuyu",t:"Adstringierende Sorten erst sehr weich essen. Persimon und Sharon sind auch fest genießbar."},
+ {id:"granat",n:"Granatapfel",k:"sued",c:"#B52235",ref:38,s:.5,h:["09-20","10-01","11-15","12-15"],st:60,r:[28,44.5],o:"Spanien, Türkei, Israel",so:"Mollar de Elche, Wonderful, Hicaz",t:"Die Kerne lösen sich am leichtesten unter Wasser aus der Frucht."},
+ {id:"olive",n:"Olive",k:"sued",c:"#6F7A2E",ref:40,s:.3,h:["10-01","10-20","12-15","01-31"],r:[28,44.5],o:"Mittelmeerraum",so:"Kalamata, Taggiasca, Manzanilla, Leccino",t:"Frisch vom Baum ungenießbar bitter. Erst das Einlegen in Lake macht Oliven essbar."},
+ {id:"kiwi",n:"Kiwi",k:"sued",c:"#8C7B4A",ref:40,s:.5,h:["10-20","11-01","11-30","12-10"],st:150,r:[33,47.5],o:"Italien, Griechenland, Neuseeland",so:"Hayward, Soreli, Zespri Gold",t:"Hart geerntet und lange lagerfähig. Neben Äpfeln gelagert reift sie schneller."},
+ {id:"melone",n:"Zuckermelone",k:"sued",c:"#E9B36A",ref:40,h:["06-15","07-01","08-31","09-30"],r:[25,47.5],o:"Spanien, Italien",so:"Cantaloupe, Charentais, Galia, Honigmelone",t:"Eine reife Melone duftet am Stielansatz süß."},
+ {id:"kaktusfeige",n:"Kaktusfeige",k:"sued",c:"#D9534F",ref:37,h:["08-01","08-15","09-30","10-31"],r:[24,40],o:"Sizilien, Spanien, Nordafrika",so:"Sanguigna, Sulfarina, Muscaredda",t:"Vorsicht, feine Stacheln. Mit Handschuhen schälen."},
+ {id:"wollmispel",n:"Japanische Wollmispel",k:"sued",c:"#EFA640",ref:38,h:["04-15","05-01","05-31","06-15"],r:[26,42],o:"Spanien, Italien",so:"Algerie, Tanaka",t:"Frühe Frucht des Mittelmeerraums, in Italien Nespola, in Spanien Níspero genannt."},
+ {id:"mango",n:"Mango",k:"tropen",c:"#F3B33D",ref:20,h:["03-15","04-15","07-15","08-31"],r:[0,32],o:"Indien, Mexiko, Peru, Westafrika",so:"Alphonso, Kent, Keitt, Tommy Atkins",t:"Die Erntezeit unterscheidet sich je nach Anbauland und Sorte stark."},
+ {id:"banane",n:"Banane",k:"tropen",c:"#EFD54A",y:true,r:[0,30],o:"Ecuador, Kolumbien, Kanaren",so:"Cavendish, Plátano de Canarias, Babybanane",t:"Wird grün geerntet und reift nach. In den Tropen das ganze Jahr verfügbar."},
+ {id:"ananas",n:"Ananas",k:"tropen",c:"#D9B23A",y:true,pk:["03-01","06-30"],r:[0,26],o:"Costa Rica, Ghana",so:"MD2 (Extra Sweet), Queen Victoria",t:"Reift nach der Ernte kaum nach. Reif riecht sie süß am Stielansatz."},
+ {id:"papaya",n:"Papaya",k:"tropen",c:"#F0883E",y:true,r:[0,27],o:"Brasilien, Mexiko",so:"Formosa, Solo",t:"In den Tropen ganzjährig. Die Kerne sind essbar und schmecken pfeffrig."},
+ {id:"avocado",n:"Avocado",k:"tropen",c:"#4E6B2E",ref:36,s:0,h:["11-01","12-01","04-30","05-31"],r:[10,40],o:"Spanien, Peru, Mexiko",so:"Hass, Fuerte, Bacon",t:"Hass reift im Winter und Frühjahr. Nach der Ernte bei Zimmertemperatur nachreifen lassen."},
+ {id:"passion",n:"Passionsfrucht",k:"tropen",c:"#6B3B6E",y:true,r:[0,30],o:"Kolumbien, Kenia",so:"Maracuja (gelb), Purpurgranadilla",t:"Reif, wenn die Schale schrumpelig wird."},
+ {id:"litschi",n:"Litschi",k:"tropen",c:"#D64550",ref:22,h:["05-15","06-01","07-15","07-31"],r:[17,28],o:"China, Thailand, Madagaskar",so:"Mauritius, Feizixiao",t:"Kurze Saison im Frühsommer. Die Schale lässt sich leicht abziehen."},
+ {id:"dattel",n:"Dattel",k:"tropen",c:"#8A5A2B",ref:28,s:.5,h:["08-15","09-15","11-15","12-15"],st:180,r:[20,34],o:"Tunesien, Israel, Ägypten",so:"Deglet Nour, Medjool",t:"Frisch im Herbst, getrocknet das ganze Jahr."}
+];
+
+/* Verwendung je Obstart */
+const USE={
+ apfel:["roh","Kuchen","Apfelmus","Saft","Bratapfel"],birne:["roh","Kompott","Kuchen","Saft","Dörrobst"],quitte:["Gelee","Mus","Quittenbrot","Likör"],mispel:["Gelee","Mus","Likör"],
+ suesskirsche:["roh","Kuchen","Kompott","Marmelade"],sauerkirsche:["Kuchen","Kompott","Saft","Marmelade"],zwetschge:["Zwetschgenkuchen","Pflaumenmus","Kompott","Dörrobst","Schnaps"],
+ mirabelle:["roh","Kuchen","Konfitüre","Schnaps"],reneklode:["roh","Kompott","Konfitüre"],aprikose:["roh","Marmelade","Marillenknödel","Kuchen","Dörrobst"],pfirsich:["roh","Kuchen","Kompott","Marmelade"],
+ erdbeere:["roh","Erdbeerkuchen","Marmelade","Desserts"],himbeere:["roh","Desserts","Marmelade","Sirup"],brombeere:["roh","Marmelade","Saft","Desserts"],
+ rjoh:["Gelee","Saft","Kuchen","Rote Grütze"],sjoh:["Saft","Gelee","Likör (Cassis)"],stachel:["Kuchen","Kompott","Marmelade","reif roh"],heidel:["roh","Pfannkuchen","Muffins","Marmelade"],
+ traube:["roh","Saft","Wein","Rosinen"],kiwibeere:["roh","Müsli","Desserts"],aronia:["Saft","getrocknet","Marmelade","Smoothies"],preisel:["Kompott zu Wild","Marmelade","Saft"],
+ sanddorn:["Saft","Sirup","Marmelade","Likör"],holunder:["Saft","Gelee","Suppe","nur gekocht"],schlehe:["Likör","Gelee","Saft"],hagebutte:["Mus","Tee","Marmelade"],
+ kornel:["Marmelade","Saft","Likör"],vogelbeere:["Gelee","Schnaps"],moltebeere:["Marmelade","Desserts","Likör"],
+ walnuss:["roh","Backen","Salate","Pesto","Öl"],hasel:["roh","Backen","Nougat","Krokant"],kastanie:["geröstet","Füllungen","Püree","Suppen"],mandel:["roh","Backen","Marzipan","Mandelmilch"],
+ feige:["roh","zu Käse","Konfitüre","getrocknet"],orange:["roh","Saft","Salate","Marmelade"],mandarine:["roh","Desserts"],zitrone:["Saft","Schale zum Backen","Getränke","Dressings"],
+ kaki:["roh","Desserts","Smoothies"],granat:["roh","Salate","Saft","Desserts"],olive:["eingelegt","Olivenöl","Tapenade"],kiwi:["roh","Müsli","Desserts"],melone:["roh","Obstsalat","mit Schinken"],
+ kaktusfeige:["roh","Saft","Sirup"],wollmispel:["roh","Marmelade"],mango:["roh","Chutney","Smoothies","Currys"],banane:["roh","Backen","Smoothies"],ananas:["roh","gegrillt","Currys","Desserts"],
+ papaya:["roh","grün als Salat","Smoothies"],avocado:["roh","Guacamole","Salate","Brotaufstrich"],passion:["roh","Desserts","Saft"],litschi:["roh","Desserts"],dattel:["roh","Backen","zum Süßen","gefüllt"]
+};
+const useText=id=>{const u=USE[id]||FRUITS.find(f=>f.id===id)?.u||[];return u.length?u[0].charAt(0).toUpperCase()+u[0].slice(1)+(u.length>1?" · "+u.slice(1).join(" · "):""):"";};
+
+/* ---------- Gemüse-Datenbank (gleiches Format, gh = Gewächshaus/Folie, u = Verwendung) ---------- */
+const VEG=[
+ {id:"blumenkohl",n:"Blumenkohl",k:"kohl",c:"#E2DBBC",fr:1,h:["06-01","07-01","10-15","11-15"],r:[30,62],so:"Clapton, Neckarperle, Graffiti (violett), Romanesco",u:["gekocht","gratiniert","Suppe","Rohkost"],t:"Die Blätter schützen die Blume vor Sonne. Kühl gelagert hält er einige Tage."},
+ {id:"brokkoli",n:"Brokkoli",k:"kohl",c:"#3E7A3C",fr:1,h:["06-15","07-01","10-15","11-15"],r:[30,62],so:"Marathon, Belstar, Calabrese",u:["gedünstet","Pfanne","Suppe","Salat"],t:"Die geschälten Stiele sind zart und lecker. Schnell verbrauchen, er vergilbt rasch."},
+ {id:"weisskohl",n:"Weißkohl",k:"kohl",c:"#C9DDA7",fr:1,h:["06-15","08-15","11-15","12-10"],st:150,r:[34,66],so:"Filderkraut, Dithmarscher Frühkohl, Ruhm von Enkhuizen",u:["Krautsalat","Sauerkraut","Eintopf","Kohlrouladen"],t:"Lagert kühl über Monate. Für Sauerkraut wird er fein gehobelt und mit Salz vergoren."},
+ {id:"rotkohl",n:"Rotkohl",k:"kohl",c:"#7B2D5E",fr:1,h:["07-01","09-01","11-15","12-10"],st:150,r:[34,66],so:"Roodkop, Rodynda, Marner Lagerrot",u:["Rotkraut","Salat","geschmort"],t:"Ein Schuss Essig oder ein Apfel hält die Farbe rotviolett, sonst wird er bläulich."},
+ {id:"wirsing",n:"Wirsing",k:"kohl",c:"#8FB466",h:["06-15","09-01","12-15","02-28"],r:[34,62],so:"Vertus, Smaragd, Winterfürst",u:["Eintopf","Rouladen","Rahmwirsing","Pasta"],t:"Winterwirsing verträgt Frost und bleibt bis ins Frühjahr auf dem Feld."},
+ {id:"gruenkohl",n:"Grünkohl",k:"kohl",c:"#3F6B3A",h:["10-15","11-15","01-31","03-15"],r:[42,60],so:"Lerchenzungen, Halbhoher grüner krauser, Nero di Toscana",u:["Grünkohl mit Pinkel","Eintopf","Chips","Smoothies"],t:"Frost wandelt Stärke in Zucker um. Deshalb schmeckt Grünkohl nach den ersten Frostnächten milder."},
+ {id:"rosenkohl",n:"Rosenkohl",k:"kohl",c:"#6E9A48",h:["09-15","10-15","01-31","03-15"],r:[42,60],so:"Hilds Ideal, Groninger, Falstaff (rot)",u:["gedünstet","geröstet","Gratin"],t:"Wird am Strunk von unten nach oben geerntet. Nach Frost aromatischer."},
+ {id:"kohlrabi",n:"Kohlrabi",k:"kohl",c:"#B9D58A",gh:["03-20","05-10"],h:["05-01","05-15","09-30","10-31"],r:[34,64],so:"Lanro, Blaro (blau), Superschmelz",u:["roh","gedünstet","in Rahm","Suppe"],t:"Die zarten Herzblätter kann man mitkochen. Frühe Ware stammt aus Gewächshaus und Folientunnel."},
+ {id:"chinakohl",n:"Chinakohl",k:"kohl",c:"#DCE8B0",fr:1,h:["08-15","09-15","10-31","11-30"],st:60,r:[34,62],so:"Granat, Bilko",u:["Salat","Wok","Kimchi"],t:"Mild und zart. Gekühlt lagert er einige Wochen."},
+ {id:"spitzkohl",n:"Spitzkohl",k:"kohl",c:"#A9C97A",h:["05-15","06-15","09-30","10-31"],r:[34,62],so:"Filderkraut, Caraflex, Express",u:["Pfanne","Salat","geschmort"],t:"Zarter und milder als Weißkohl. Braucht nur kurze Garzeit."},
+ {id:"kartoffel",n:"Kartoffel",k:"wurzel",c:"#C9A866",h:["06-01","08-15","10-15","10-31"],st:210,r:[10,68],so:"Annabelle, Linda, Belana, Sieglinde, Adretta, Bintje",u:["Pellkartoffeln","Bratkartoffeln","Püree","Salat","Pommes"],t:"Frühkartoffeln haben eine dünne Schale und lagern nicht. Lagerkartoffeln dunkel und kühl aufbewahren, sonst werden sie grün."},
+ {id:"moehre",n:"Möhre",k:"wurzel",c:"#E87A2A",fr:1,h:["06-01","08-01","10-31","11-30"],st:180,r:[20,68],so:"Nantaise, Rodelika, Bolero, Pariser Markt",u:["roh","Rohkost","Suppe","Kuchen","Saft"],t:"Lagert in feuchtem Sand oder im Kühlschrank lange. Das Grün vorher abdrehen."},
+ {id:"rotebete",n:"Rote Bete",k:"wurzel",c:"#8E1E3C",fr:1,h:["07-01","08-15","10-31","11-15"],st:180,r:[30,66],so:"Rote Kugel, Chioggia, Burpees Golden",u:["Salat","Ofengemüse","Borschtsch","Saft"],t:"Mit Handschuhen schälen, sie färbt stark. Roh geraspelt schmeckt sie erdig-süß."},
+ {id:"pastinake",n:"Pastinake",k:"wurzel",c:"#E9DDB6",h:["10-01","10-15","02-28","03-31"],r:[38,62],so:"Halblange Weiße, Gladiator",u:["Püree","Suppe","Ofengemüse","Chips"],t:"Nach Frost süßer. Sie kann den Winter über im Boden bleiben."},
+ {id:"petersilienwurzel",n:"Petersilienwurzel",k:"wurzel",c:"#EEE3C2",h:["09-15","10-01","12-31","02-28"],r:[38,62],so:"Berliner Halblange, Arat",u:["Suppe","Püree","Brühe"],t:"Würziger als Pastinake und ein klassischer Teil des Suppengrüns."},
+ {id:"sellerie",n:"Knollensellerie",k:"wurzel",c:"#D8D2A6",fr:1,h:["09-01","09-15","10-31","11-30"],st:150,r:[34,62],so:"Prinz, Monarch, Mars",u:["Suppe","Sellerieschnitzel","Püree","Salat"],t:"Teil des Suppengrüns. In Scheiben paniert wird er zum Sellerieschnitzel."},
+ {id:"schwarzwurzel",n:"Schwarzwurzel",k:"wurzel",c:"#3A2E25",h:["10-15","11-01","02-15","03-31"],r:[40,58],so:"Hoffmanns Schwarze Pfahl, Duplex",u:["gekocht","Rahmgemüse","Suppe"],t:"Beim Schälen tritt klebriger Milchsaft aus. Handschuhe tragen und die Stangen in Essigwasser legen."},
+ {id:"radieschen",n:"Radieschen",k:"wurzel",c:"#D8344F",gh:["03-01","04-30"],h:["04-15","05-01","09-30","10-31"],r:[25,68],so:"Saxa, Riesenbutter, Eiszapfen",u:["roh","aufs Brot","Salat"],t:"Ohne Blätter lagern, sonst werden sie schnell weich."},
+ {id:"rettich",n:"Rettich",k:"wurzel",c:"#EDEAE0",fr:1,h:["05-01","06-01","10-15","11-15"],st:60,r:[30,64],so:"Münchner Bier, Neckarruhm, Daikon",u:["roh","Radi zur Brotzeit","Salat"],t:"Der bayerische Radi wird spiralig geschnitten, gesalzen und zur Brotzeit gegessen."},
+ {id:"topinambur",n:"Topinambur",k:"wurzel",c:"#B88B5A",h:["10-15","11-01","02-28","03-31"],r:[36,62],so:"Bianca, Rote Zonenkugel",u:["roh","Suppe","Ofengemüse","Chips"],t:"Schmeckt leicht nussig. Wird schnell weich, also bald verbrauchen."},
+ {id:"steckruebe",n:"Steckrübe",k:"wurzel",c:"#D9B35A",h:["09-15","10-15","12-31","01-31"],st:60,r:[40,66],so:"Wilhelmsburger, Gelbe Schmalz",u:["Eintopf","Püree","Ofengemüse"],t:"Früher Notnahrung, heute wieder beliebt. Lagert kühl mehrere Monate."},
+ {id:"suesskartoffel",n:"Süßkartoffel",k:"wurzel",c:"#D06A2E",ref:40,h:["08-15","09-01","10-15","10-31"],st:150,r:[5,47],o:"Spanien, Portugal, USA",so:"Beauregard, Murasaki, Covington",u:["Ofen","Pommes","Püree","Curry"],t:"Nicht im Kühlschrank lagern, Kälte schadet ihr."},
+ {id:"meerrettich",n:"Meerrettich",k:"wurzel",c:"#E6DFC9",h:["10-01","10-15","12-31","02-28"],r:[40,60],so:"Spreewälder, Bayerischer Meerrettich",u:["frisch gerieben","zu Fisch und Fleisch","Soßen"],t:"Erst kurz vor dem Servieren reiben, das Aroma verfliegt schnell."},
+ {id:"zwiebel",n:"Zwiebel",k:"zwiebel",c:"#C79A4A",h:["07-15","08-15","09-15","09-30"],st:240,r:[25,66],so:"Stuttgarter Riesen, Sturon, Rote Baron",u:["Grundlage vieler Gerichte","Zwiebelkuchen","Röstzwiebeln"],t:"Trocken, dunkel und luftig gelagert halten Zwiebeln bis ins Frühjahr."},
+ {id:"fruehlingszwiebel",n:"Frühlingszwiebel",k:"zwiebel",c:"#8DC06A",h:["05-01","05-15","09-30","10-31"],r:[15,66],so:"Ishikura, White Lisbon",u:["roh","Salat","Wok"],t:"Die weiße Knolle und das Grün sind beide essbar."},
+ {id:"lauch",n:"Lauch (Porree)",k:"zwiebel",c:"#6E9E5C",h:["07-01","09-01","02-28","03-31"],r:[34,62],so:"Blaugrüner Winter, Hannibal, Bandit",u:["Suppe","Quiche","Gemüse","Gratin"],t:"Zwischen den Blättern sitzt oft Erde. Längs einschneiden und gründlich waschen."},
+ {id:"knoblauch",n:"Knoblauch",k:"zwiebel",c:"#E2DCCB",h:["07-01","07-15","08-15","08-31"],st:240,r:[25,62],so:"Thermidrome, Germidour, Printanor",u:["Würzen","Aioli","Confit"],t:"Junger Knoblauch im Frühsommer ist mild und saftig. Getrocknet lagert er monatelang."},
+ {id:"baerlauch",n:"Bärlauch",k:"zwiebel",c:"#4F8A3A",h:["03-01","03-20","04-30","05-15"],r:[42,60],so:"Wildsammlung, Gartenkultur",u:["Pesto","Suppe","Kräuterbutter","Quark"],t:"Verwechslungsgefahr mit giftigem Maiglöckchen und Herbstzeitlose. Echter Bärlauch riecht beim Zerreiben nach Knoblauch."},
+ {id:"schalotte",n:"Schalotte",k:"zwiebel",c:"#B06A5A",h:["07-15","08-01","08-31","09-15"],st:180,r:[25,62],so:"Longor, Jermor, Échalion",u:["Soßen","Vinaigrette","geschmort"],t:"Milder und feiner als Zwiebeln, ideal für Soßen."},
+ {id:"kopfsalat",n:"Kopfsalat",k:"blatt",c:"#9FCB6A",gh:["03-01","04-30"],h:["05-01","05-20","09-15","10-31"],r:[25,66],so:"Maikönig, Attraction, Lollo Rosso, Eichblatt",u:["Salat"],t:"Frühe Ware wächst unter Glas oder Folie. Erst kurz vor dem Essen anmachen."},
+ {id:"eisberg",n:"Eisbergsalat",k:"blatt",c:"#C8E3A0",h:["06-01","06-15","09-15","10-15"],r:[30,64],so:"Saladin, Fortunas",u:["Salat","Burger","Wraps"],t:"Knackig und im Kühlschrank über eine Woche haltbar."},
+ {id:"feldsalat",n:"Feldsalat",k:"blatt",c:"#4E8C3E",h:["10-01","10-15","03-15","04-15"],r:[34,60],so:"Vit, Gala, Dunkelgrüner Vollherziger",u:["Salat mit Speck","mit Nüssen","mit Kartoffeldressing"],t:"Winterhart und der typische Wintersalat. Gründlich waschen, die Rosetten sind oft sandig."},
+ {id:"spinat",n:"Spinat",k:"blatt",c:"#2F6B35",h:["03-20","04-01","05-31","11-30"],r:[25,66],so:"Matador, Butterflay, Wurzelspinat",u:["roh als Salat","Rahmspinat","Lasagne","Smoothies"],t:"Frühjahrs- und Herbstspinat sind am zartesten. Gekochten Spinat nicht lange warm halten."},
+ {id:"mangold",n:"Mangold",k:"blatt",c:"#7FA850",h:["06-01","07-01","09-30","11-15"],r:[25,64],so:"Lucullus, Bright Lights, Glatter Silber",u:["wie Spinat","Stiele gedünstet","Quiche"],t:"Die Stiele etwas länger garen als die Blätter."},
+ {id:"rucola",n:"Rucola",k:"blatt",c:"#5A8A3A",h:["05-01","05-15","09-30","10-31"],r:[25,64],so:"Rucola coltivata, Wilde Rauke",u:["Salat","auf Pizza","Pesto"],t:"Im Sommer schärfer, junge Blätter sind milder."},
+ {id:"endivie",n:"Endivie",k:"blatt",c:"#B5D07A",fr:1,h:["08-01","09-01","10-31","11-30"],r:[34,58],so:"Escariol, Frisée",u:["Salat","Endiviensalat mit Kartoffeln"],t:"Leicht bitter. Lauwarmes Wasser mildert die Bitterstoffe."},
+ {id:"chicoree",n:"Chicorée",k:"blatt",c:"#F3EEC7",h:["10-15","11-01","03-31","04-30"],r:[38,58],so:"Zoom, Totem",u:["Salat","gratiniert","Schiffchen mit Füllung"],t:"Wächst im Dunkeln aus eingelagerten Wurzeln. Den bitteren Strunk keilförmig herausschneiden."},
+ {id:"radicchio",n:"Radicchio",k:"blatt",c:"#9E2343",fr:1,h:["09-01","09-15","11-30","12-31"],r:[34,56],so:"Chioggia, Treviso, Castelfranco",u:["Salat","Risotto","gegrillt"],t:"Hitze mildert die Bitterkeit, etwa gegrillt oder im Risotto."},
+ {id:"tomate",n:"Tomate",k:"frucht",c:"#D8352A",gh:["04-01","11-15"],h:["07-01","07-20","09-15","10-15"],r:[15,60],so:"Harzfeuer, Ochsenherz, San Marzano, Cocktailtomaten",u:["roh","Salat","Soße","Suppe","Ofen"],t:"Nicht im Kühlschrank lagern, dort verliert sie Aroma. Freilandtomaten haben ab Juli Saison."},
+ {id:"gurke",n:"Gurke",k:"frucht",c:"#3E8E4E",gh:["04-01","10-31"],h:["07-01","07-15","08-31","09-30"],r:[15,60],so:"Salatgurke Dominica, Einlegegurke Vorgebirgstrauben, Snackgurke",u:["Salat","Tzatziki","roh","eingelegt"],t:"Regionale Gurken kommen von April bis Oktober aus Gewächshäusern, im Hochsommer auch vom Feld."},
+ {id:"zucchini",n:"Zucchini",k:"frucht",c:"#5A8F3C",h:["06-15","07-01","09-15","10-15"],r:[15,60],so:"Black Beauty, Gold Rush, Defender",u:["Pfanne","Ofen","gefüllt","Puffer"],t:"Jung geerntet am zartesten. Bitter schmeckende Zucchini nicht essen."},
+ {id:"paprika",n:"Paprika",k:"frucht",c:"#E23B2A",gh:["05-01","11-15"],h:["08-01","08-15","09-30","10-15"],r:[15,52],so:"Mavras, Pusztagold, Spitzpaprika",u:["roh","gefüllt","Ofen","Ajvar"],t:"Grüne Paprika ist unreif geerntet, rote und gelbe sind ausgereift und süßer."},
+ {id:"aubergine",n:"Aubergine",k:"frucht",c:"#4A2A5A",gh:["06-01","10-31"],h:["08-01","08-15","09-15","09-30"],r:[10,50],so:"Black Beauty, Rosa Bianca, Listada de Gandia",u:["Ofen","Moussaka","gegrillt","Baba Ghanoush"],t:"Roh nicht genießbar. Vor dem Braten salzen, das zieht Wasser."},
+ {id:"kuerbis",n:"Kürbis",k:"frucht",c:"#E87422",h:["08-15","09-15","10-31","11-15"],st:150,r:[15,62],so:"Hokkaido, Butternut, Muskatkürbis, Spaghettikürbis",u:["Suppe","Ofen","Curry","Kuchen"],t:"Hokkaido kann man mit Schale essen. Ganze Kürbisse lagern kühl und trocken monatelang."},
+ {id:"mais",n:"Zuckermais",k:"frucht",c:"#F2C93A",h:["08-01","08-15","09-15","09-30"],r:[10,56],so:"Golden Bantam, Damaun, Mirai",u:["gegrillt","gekocht","Salat"],t:"Nach der Ernte wird Zucker schnell zu Stärke. Frisch ist Mais am süßesten."},
+ {id:"bohne",n:"Grüne Bohne",k:"huelse",c:"#4F8B3B",h:["07-01","07-15","09-15","10-15"],r:[10,62],so:"Buschbohne Saxa, Stangenbohne Blauhilde, Neckarkönigin",u:["Bohnensalat","Gemüse","Eintopf"],t:"Roh giftig durch Phasin. Immer mindestens zehn Minuten kochen."},
+ {id:"erbse",n:"Erbse & Zuckerschote",k:"huelse",c:"#7DB548",h:["06-01","06-15","07-15","07-31"],r:[25,64],so:"Kleine Rheinländerin, Zuckerschote Norli, Kelvedon Wonder",u:["frisch roh","Gemüse","Suppe","Risotto"],t:"Frisch aus der Schote schmecken Erbsen süß. Zuckerschoten isst man mit Hülse."},
+ {id:"dickebohne",n:"Dicke Bohne",k:"huelse",c:"#9BB86A",h:["06-15","06-25","07-20","07-31"],r:[30,62],so:"Hangdown, Dreifach Weiße",u:["Eintopf","Püree","mit Speck"],t:"Die Kerne nach dem Blanchieren aus der zähen Haut drücken."},
+ {id:"spargel",n:"Spargel",k:"spross",c:"#EDE4C2",s:.5,h:["04-15","05-01","06-15","06-24"],r:[34,58],so:"Ravel, Gijnlim, Backlim, Grünspargel Grolim",u:["gekocht mit Hollandaise","Suppe","Ofen","grün in der Pfanne"],t:"Die Saison endet traditionell am Johannistag (24. Juni), damit sich die Pflanzen erholen."},
+ {id:"rhabarber",n:"Rhabarber",k:"spross",c:"#C8395A",s:.5,h:["04-01","04-20","06-10","06-24"],r:[38,64],so:"Holsteiner Blut, Frambozen Rood, Elmsfeuer",u:["Kompott","Kuchen","Marmelade","Schorle"],t:"Nur die Stiele essen, die Blätter enthalten viel Oxalsäure. Geerntet wird bis zum Johannistag."},
+ {id:"fenchel",n:"Fenchel",k:"spross",c:"#CFE0A2",h:["06-15","07-01","10-15","11-15"],r:[25,58],so:"Finale, Orion, Rondo",u:["roh als Salat","Ofen","geschmort"],t:"Das Fenchelgrün ist ein feines Würzkraut."},
+ {id:"staudensellerie",n:"Staudensellerie",k:"spross",c:"#A9C979",h:["07-01","08-01","10-15","11-15"],r:[25,60],so:"Tango, Golden Spartan",u:["roh mit Dip","Suppe","Soffritto"],t:"Die Fasern an der Außenseite mit dem Sparschäler abziehen."},
+ {id:"artischocke",n:"Artischocke",k:"spross",c:"#6F8A5C",ref:40,s:.5,h:["03-15","04-01","05-31","06-15"],r:[28,46],o:"Italien, Spanien, Frankreich",so:"Romanesco, Violetto, Camus de Bretagne",u:["gekocht mit Dip","Artischockenböden","eingelegt"],t:"Die Blätter einzeln abzupfen und den fleischigen Teil in einen Dip tauchen."}
+];
+FRUITS.push(...VEG);
+/* Kühle-Saison-Gemüse: in warmen Klimazonen (effektiver Breitengrad < 43°) als Wintergemüse angebaut */
+const COOL=new Set(["blumenkohl","brokkoli","weisskohl","rotkohl","wirsing","kohlrabi","chinakohl","spitzkohl","kopfsalat","eisberg","spinat","mangold","rucola","fenchel","erbse","dickebohne","radieschen","moehre","rettich","fruehlingszwiebel","endivie","radicchio"]);
+const COOL_H=["10-15","12-01","03-15","05-15"];
+
+/* ---------- Ortsverzeichnis: [Name, Land, Breite, Länge, Höhe m, Lage (w = warm), Suchbegriffe] ---------- */
+const G=[
+["Berlin","DE",52.52,13.40,34],["Hamburg","DE",53.55,9.99,10],["München","DE",48.14,11.58,519,"","munich muenchen"],["Köln","DE",50.94,6.96,53,"w","cologne koeln"],
+["Frankfurt am Main","DE",50.11,8.68,112,"w","frankfurt"],["Stuttgart","DE",48.78,9.18,245,"w"],["Düsseldorf","DE",51.23,6.78,38],["Leipzig","DE",51.34,12.37,113],
+["Dortmund","DE",51.51,7.47,86],["Essen","DE",51.46,7.01,116],["Bremen","DE",53.08,8.80,12],["Dresden","DE",51.05,13.74,113,"w"],["Hannover","DE",52.37,9.73,55],
+["Nürnberg","DE",49.45,11.08,309,"","nuremberg"],["Duisburg","DE",51.43,6.76,31],["Bochum","DE",51.48,7.22,100],["Wuppertal","DE",51.26,7.15,160],["Bielefeld","DE",52.02,8.53,118],
+["Bonn","DE",50.74,7.10,60,"w"],["Münster","DE",51.96,7.63,60],["Mannheim","DE",49.49,8.47,97,"w"],["Karlsruhe","DE",49.01,8.40,115,"w"],["Augsburg","DE",48.37,10.90,494],
+["Wiesbaden","DE",50.08,8.24,115,"w"],["Mönchengladbach","DE",51.19,6.44,70],["Aachen","DE",50.78,6.08,175],["Braunschweig","DE",52.27,10.52,75],["Kiel","DE",54.32,10.14,5],
+["Chemnitz","DE",50.83,12.92,300],["Halle (Saale)","DE",51.48,11.97,90],["Magdeburg","DE",52.13,11.63,55],["Freiburg im Breisgau","DE",47.99,7.84,278,"w"],["Krefeld","DE",51.33,6.56,35],
+["Mainz","DE",50.00,8.27,89,"w"],["Lübeck","DE",53.87,10.69,13],["Erfurt","DE",50.98,11.03,195],["Oberhausen","DE",51.47,6.85,45],["Rostock","DE",54.09,12.10,13],
+["Kassel","DE",51.31,9.48,165],["Hagen","DE",51.36,7.47,105],["Potsdam","DE",52.39,13.06,35],["Saarbrücken","DE",49.23,7.00,230],["Hamm","DE",51.68,7.82,63],
+["Ludwigshafen am Rhein","DE",49.48,8.44,96,"w"],["Oldenburg","DE",53.14,8.21,7],["Osnabrück","DE",52.28,8.05,63],["Heidelberg","DE",49.40,8.69,114,"w"],["Darmstadt","DE",49.87,8.65,144,"w"],
+["Solingen","DE",51.17,7.08,220],["Regensburg","DE",49.01,12.10,343],["Paderborn","DE",51.72,8.75,110],["Ingolstadt","DE",48.77,11.43,374],["Würzburg","DE",49.79,9.95,177,"w"],
+["Ulm","DE",48.40,9.99,479],["Wolfsburg","DE",52.42,10.79,60],["Heilbronn","DE",49.14,9.22,157,"w"],["Göttingen","DE",51.54,9.93,150],["Pforzheim","DE",48.89,8.70,261],
+["Offenbach am Main","DE",50.10,8.77,100,"w"],["Trier","DE",49.75,6.64,130,"w"],["Reutlingen","DE",48.49,9.21,382],["Bremerhaven","DE",53.55,8.58,3],["Koblenz","DE",50.36,7.59,65,"w"],
+["Jena","DE",50.93,11.59,155],["Gera","DE",50.88,12.08,205],["Siegen","DE",50.87,8.02,290],["Hildesheim","DE",52.15,9.95,89],["Cottbus","DE",51.76,14.33,75],
+["Schwerin","DE",53.63,11.41,40],["Zwickau","DE",50.72,12.50,270],["Plauen","DE",50.50,12.14,400],["Görlitz","DE",51.15,14.99,200],["Bautzen","DE",51.18,14.42,200],
+["Frankfurt (Oder)","DE",52.34,14.55,30],["Oranienburg","DE",52.75,13.24,35],["Eberswalde","DE",52.83,13.82,30],["Neubrandenburg","DE",53.56,13.26,20],["Greifswald","DE",54.10,13.38,5],
+["Stralsund","DE",54.31,13.09,5],["Flensburg","DE",54.79,9.44,20],["Husum","DE",54.48,9.05,5],["Itzehoe","DE",53.92,9.52,10],["Lüneburg","DE",53.25,10.41,17],
+["Celle","DE",52.62,10.08,40],["Stade","DE",53.60,9.48,7,"","altes land jork"],["Cuxhaven","DE",53.87,8.69,5],["Wilhelmshaven","DE",53.53,8.11,2],["Emden","DE",53.37,7.21,1],
+["Hameln","DE",52.10,9.36,68],["Detmold","DE",51.94,8.88,135],["Herford","DE",52.11,8.67,70],["Fulda","DE",50.55,9.68,261],["Gießen","DE",50.58,8.68,160],["Marburg","DE",50.81,8.77,190],
+["Bad Kreuznach","DE",49.84,7.87,105,"w"],["Kaiserslautern","DE",49.44,7.77,235],["Neustadt an der Weinstraße","DE",49.35,8.14,136,"w"],["Landau in der Pfalz","DE",49.20,8.12,144,"w"],
+["Konstanz","DE",47.66,9.18,405],["Friedrichshafen","DE",47.65,9.48,400],["Ravensburg","DE",47.78,9.61,450],["Lindau","DE",47.55,9.69,400],["Villingen-Schwenningen","DE",48.06,8.46,700],
+["Offenburg","DE",48.47,7.94,160,"w"],["Oberkirch","DE",48.53,8.08,194,"w"],["Bühl (Baden)","DE",48.70,8.13,135,"w"],["Tübingen","DE",48.52,9.06,341],["Aalen","DE",48.84,10.09,430],
+["Göppingen","DE",48.70,9.65,323],["Ludwigsburg","DE",48.89,9.19,292,"w"],["Böblingen","DE",48.68,9.01,440],["Kempten","DE",47.73,10.31,674],["Garmisch-Partenkirchen","DE",47.49,11.10,708],
+["Rosenheim","DE",47.86,12.12,446],["Landshut","DE",48.54,12.15,393],["Passau","DE",48.57,13.43,300],["Bayreuth","DE",49.95,11.58,340],["Hof","DE",50.31,11.92,495],
+["Bamberg","DE",49.89,10.89,262],["Coburg","DE",50.26,10.96,297],["Erlangen","DE",49.60,11.00,279],["Ansbach","DE",49.30,10.57,405],["Amberg","DE",49.44,11.86,374],
+["Weiden in der Oberpfalz","DE",49.68,12.16,397],["Suhl","DE",50.61,10.69,430],["Meiningen","DE",50.57,10.42,290],["Weimar","DE",50.98,11.32,208],["Freising","DE",48.40,11.75,448],
+["Starnberg","DE",48.00,11.34,590],["Hanau","DE",50.13,8.92,105,"w"],["Aschaffenburg","DE",49.97,9.15,138,"w"],["Bad Homburg","DE",50.23,8.62,197],["Neuss","DE",51.20,6.69,40],
+["Ingelheim am Rhein","DE",49.97,8.06,120,"w","rheinhessen"],["Werder (Havel)","DE",52.38,12.93,35],["Meckenheim","DE",50.63,7.03,170],["Naumburg (Saale)","DE",51.15,11.81,110,"w","saale-unstrut"],
+["Meißen","DE",51.16,13.47,110,"w"],["Sylt (Westerland)","DE",54.91,8.31,5],["Pretzfeld","DE",49.75,11.18,280,"","fränkische schweiz"],["Kerpen","DE",50.87,6.70,90],
+["Wien","AT",48.21,16.37,180,"w","vienna"],["Graz","AT",47.07,15.44,353],["Linz","AT",48.31,14.29,266],["Salzburg","AT",47.81,13.04,424],["Innsbruck","AT",47.27,11.39,574],
+["Klagenfurt","AT",46.62,14.31,446],["Villach","AT",46.61,13.85,500],["St. Pölten","AT",48.20,15.62,267,"","sankt poelten"],["Krems an der Donau","AT",48.41,15.61,203,"w","wachau"],
+["Wiener Neustadt","AT",47.81,16.25,265],["Eisenstadt","AT",47.85,16.52,182,"w","burgenland"],["Bregenz","AT",47.50,9.75,427],["Feldkirch","AT",47.24,9.60,458],["Lienz","AT",46.83,12.77,673],
+["Wels","AT",48.16,14.02,317],["Gleisdorf","AT",47.10,15.71,365,"","apfelland"],
+["Zürich","CH",47.37,8.54,408,"","zurich"],["Genf","CH",46.20,6.14,375,"w","geneve geneva"],["Basel","CH",47.56,7.59,260,"w"],["Bern","CH",46.95,7.45,540],["Lausanne","CH",46.52,6.63,495],
+["Luzern","CH",47.05,8.31,436,"","lucerne"],["St. Gallen","CH",47.42,9.37,670,"","sankt gallen"],["Lugano","CH",46.00,8.95,273,"w","tessin ticino"],["Bellinzona","CH",46.19,9.02,240,"w"],
+["Locarno","CH",46.17,8.80,200,"w"],["Chur","CH",46.85,9.53,593],["Sion","CH",46.23,7.36,512,"w","sitten wallis"],["Winterthur","CH",47.50,8.72,439],["Biel/Bienne","CH",47.14,7.25,434],
+["Neuchâtel","CH",46.99,6.93,430,"","neuenburg"],["Aarau","CH",47.39,8.04,383],["Frauenfeld","CH",47.56,8.90,405,"","thurgau"],["St. Moritz","CH",46.50,9.84,1822],["Davos","CH",46.80,9.84,1560],["Zermatt","CH",46.02,7.75,1608],
+["Bozen","IT",46.50,11.35,262,"w","bolzano südtirol"],["Meran","IT",46.67,11.16,325,"w","merano"],["Trient","IT",46.07,11.12,194,"","trento"],["Riva del Garda","IT",45.89,10.84,70,"w","gardasee"],
+["Mailand","IT",45.46,9.19,120,"","milano milan"],["Turin","IT",45.07,7.69,239,"","torino"],["Venedig","IT",45.44,12.33,2,"","venezia venice"],["Bologna","IT",44.49,11.34,54],
+["Florenz","IT",43.77,11.25,50,"","firenze"],["Rom","IT",41.90,12.50,21,"","roma rome"],["Neapel","IT",40.85,14.27,17,"","napoli naples"],["Palermo","IT",38.12,13.36,14],["Catania","IT",37.50,15.09,7],
+["Paris","FR",48.86,2.35,35],["Straßburg","FR",48.57,7.75,142,"w","strasbourg"],["Lyon","FR",45.76,4.84,173],["Marseille","FR",43.30,5.37,12],["Nizza","FR",43.70,7.27,10,"","nice"],
+["Bordeaux","FR",44.84,-0.58,15],["Toulouse","FR",43.60,1.44,146],["Montpellier","FR",43.61,3.88,30],["Lille","FR",50.63,3.06,20],["Nantes","FR",47.22,-1.55,20],
+["Brest","FR",48.39,-4.49,30],["Rouen","FR",49.44,1.10,20],["Caen","FR",49.18,-0.37,20,"","normandie"],["Metz","FR",49.12,6.18,180],["Nancy","FR",48.69,6.18,210],
+["Madrid","ES",40.42,-3.70,650],["Barcelona","ES",41.39,2.17,12],["Valencia","ES",39.47,-0.38,15],["Sevilla","ES",37.39,-5.98,10,"","seville"],["Málaga","ES",36.72,-4.42,10],
+["Huelva","ES",37.26,-6.95,20],["Murcia","ES",37.99,-1.13,43],["Lleida","ES",41.62,0.62,155],["Bilbao","ES",43.26,-2.93,20],["Palma","ES",39.57,2.65,10,"","mallorca"],
+["Santa Cruz de Tenerife","ES",28.47,-16.25,20,"","teneriffa kanaren"],["Las Palmas","ES",28.12,-15.43,10,"","gran canaria kanaren"],
+["Lissabon","PT",38.72,-9.14,50,"","lisboa lisbon"],["Porto","PT",41.15,-8.61,80],["Faro","PT",37.02,-7.93,10,"","algarve"],["Funchal","PT",32.65,-16.91,50,"","madeira"],
+["Amsterdam","NL",52.37,4.90,0],["Rotterdam","NL",51.92,4.48,0],["Utrecht","NL",52.09,5.12,5],["Brüssel","BE",50.85,4.35,60,"","bruxelles brussels"],["Antwerpen","BE",51.22,4.40,10],
+["Luxemburg","LU",49.61,6.13,300,"","luxembourg"],["London","GB",51.51,-0.13,20],["Canterbury","GB",51.28,1.08,20,"","kent"],["Manchester","GB",53.48,-2.24,40],["Edinburgh","GB",55.95,-3.19,50],
+["Dublin","IE",53.35,-6.26,20],["Kopenhagen","DK",55.68,12.57,10,"","copenhagen kobenhavn"],["Aarhus","DK",56.16,10.20,20],["Oslo","NO",59.91,10.75,20],["Bergen","NO",60.39,5.32,10],
+["Trondheim","NO",63.43,10.40,20],["Tromsø","NO",69.65,18.96,10],["Stockholm","SE",59.33,18.07,20],["Göteborg","SE",57.71,11.97,10,"","gothenburg"],["Malmö","SE",55.60,13.00,10],
+["Umeå","SE",63.83,20.26,10],["Helsinki","FI",60.17,24.94,20],["Oulu","FI",65.01,25.47,10],["Rovaniemi","FI",66.50,25.73,100],["Reykjavík","IS",64.15,-21.94,20],
+["Tallinn","EE",59.44,24.75,20],["Riga","LV",56.95,24.11,10],["Vilnius","LT",54.69,25.28,112],["Warschau","PL",52.23,21.01,100,"","warszawa warsaw"],["Krakau","PL",50.06,19.94,220,"","krakow"],
+["Danzig","PL",54.35,18.65,10,"","gdansk"],["Breslau","PL",51.11,17.04,120,"","wroclaw"],["Posen","PL",52.41,16.93,60,"","poznan"],["Stettin","PL",53.43,14.55,25,"","szczecin"],["Grójec","PL",51.87,20.87,160],
+["Prag","CZ",50.08,14.42,235,"","praha prague"],["Brünn","CZ",49.20,16.61,237,"","brno"],["Bratislava","SK",48.15,17.11,140,"w","pressburg"],["Budapest","HU",47.50,19.04,110,"w"],
+["Ljubljana","SI",46.06,14.51,295,"","laibach"],["Zagreb","HR",45.81,15.98,158],["Split","HR",43.51,16.44,10],["Belgrad","RS",44.79,20.45,117,"","beograd"],["Sarajevo","BA",43.86,18.41,520],
+["Sofia","BG",42.70,23.32,550],["Bukarest","RO",44.43,26.10,70,"","bucuresti"],["Athen","GR",37.98,23.73,70,"","athens athina"],["Thessaloniki","GR",40.64,22.94,10],
+["Istanbul","TR",41.01,28.98,40],["Izmir","TR",38.42,27.13,10],["Antalya","TR",36.90,30.70,30],["Kiew","UA",50.45,30.52,180,"","kyiv kiev"],["Moskau","RU",55.76,37.62,150,"","moskva moscow"],
+["Valletta","MT",35.90,14.51,50,"","malta"],["Nikosia","CY",35.17,33.36,150,"","nicosia zypern"],["Tunis","TN",36.81,10.18,10],["Marrakesch","MA",31.63,-7.99,470,"","marrakech"],
+["Kairo","EG",30.04,31.24,23,"","cairo"],["Tel Aviv","IL",32.08,34.78,10],
+["New York","US",40.71,-74.01,10],["Chicago","US",41.88,-87.63,180],["Los Angeles","US",34.05,-118.24,90],["San Francisco","US",37.77,-122.42,16],["Seattle","US",47.61,-122.33,50],
+["Miami","US",25.76,-80.19,2],["Toronto","CA",43.65,-79.38,76],["Montreal","CA",45.50,-73.57,30],["Vancouver","CA",49.28,-123.12,10],["Mexiko-Stadt","MX",19.43,-99.13,2240,"","mexico city ciudad de mexico"],
+["Havanna","CU",23.11,-82.37,59,"","havana"],["Bogotá","CO",4.71,-74.07,2640],["Quito","EC",-0.18,-78.47,2850],["Lima","PE",-12.05,-77.04,150],["Rio de Janeiro","BR",-22.91,-43.17,10],
+["São Paulo","BR",-23.55,-46.63,760],["Buenos Aires","AR",-34.60,-58.38,25],["Santiago de Chile","CL",-33.45,-70.67,570],["Kapstadt","ZA",-33.92,18.42,10,"","cape town"],
+["Johannesburg","ZA",-26.20,28.05,1750],["Nairobi","KE",-1.29,36.82,1795],["Lagos","NG",6.52,3.38,40],["Dubai","AE",25.20,55.27,10],["Mumbai","IN",19.08,72.88,14],["Delhi","IN",28.61,77.21,216],
+["Bangkok","TH",13.76,100.50,2],["Singapur","SG",1.35,103.82,15,"","singapore"],["Denpasar","ID",-8.65,115.22,10,"","bali"],["Peking","CN",39.90,116.40,44,"","beijing"],
+["Shanghai","CN",31.23,121.47,4],["Tokio","JP",35.68,139.69,40,"","tokyo"],["Seoul","KR",37.57,126.98,38],["Sydney","AU",-33.87,151.21,20],["Melbourne","AU",-37.81,144.96,30],
+["Brisbane","AU",-27.47,153.03,20],["Perth","AU",-31.95,115.86,20],["Hobart","AU",-42.88,147.33,30,"","tasmanien"],["Auckland","NZ",-36.85,174.76,20],["Christchurch","NZ",-43.53,172.64,10]
+];
+const COUNTRY={DE:"Deutschland",AT:"Österreich",CH:"Schweiz",IT:"Italien",FR:"Frankreich",ES:"Spanien",PT:"Portugal",NL:"Niederlande",BE:"Belgien",LU:"Luxemburg",GB:"Vereinigtes Königreich",IE:"Irland",DK:"Dänemark",NO:"Norwegen",SE:"Schweden",FI:"Finnland",IS:"Island",EE:"Estland",LV:"Lettland",LT:"Litauen",PL:"Polen",CZ:"Tschechien",SK:"Slowakei",HU:"Ungarn",SI:"Slowenien",HR:"Kroatien",RS:"Serbien",BA:"Bosnien und Herzegowina",BG:"Bulgarien",RO:"Rumänien",GR:"Griechenland",TR:"Türkei",UA:"Ukraine",RU:"Russland",MT:"Malta",CY:"Zypern",TN:"Tunesien",MA:"Marokko",EG:"Ägypten",IL:"Israel",US:"USA",CA:"Kanada",MX:"Mexiko",CU:"Kuba",CO:"Kolumbien",EC:"Ecuador",PE:"Peru",BR:"Brasilien",AR:"Argentinien",CL:"Chile",ZA:"Südafrika",KE:"Kenia",NG:"Nigeria",AE:"Vereinigte Arabische Emirate",IN:"Indien",TH:"Thailand",SG:"Singapur",ID:"Indonesien",CN:"China",JP:"Japan",KR:"Südkorea",AU:"Australien",NZ:"Neuseeland"};
+const PLACES=G.map(([n,cc,lat,lon,elev,lage,al])=>({n,cc,lat,lon,elev,lage:lage||"n",key:norm(n+" "+(al||"")),al:norm(al||"").split(" ")}));
+const byName=Object.fromEntries(PLACES.map(p=>[p.n,p]));
+
+/* PLZ-Leitregionen */
+const PLZ_DE={"01":"Dresden","02":"Görlitz","03":"Cottbus","04":"Leipzig","06":"Halle (Saale)","07":"Jena","08":"Zwickau","09":"Chemnitz","10":"Berlin","12":"Berlin","13":"Berlin","14":"Potsdam","15":"Frankfurt (Oder)","16":"Oranienburg","17":"Neubrandenburg","18":"Rostock","19":"Schwerin",
+"20":"Hamburg","21":"Hamburg","22":"Hamburg","23":"Lübeck","24":"Kiel","25":"Itzehoe","26":"Oldenburg","27":"Bremerhaven","28":"Bremen","29":"Celle","30":"Hannover","31":"Hildesheim","32":"Herford","33":"Bielefeld","34":"Kassel","35":"Gießen","36":"Fulda","37":"Göttingen","38":"Braunschweig","39":"Magdeburg",
+"40":"Düsseldorf","41":"Mönchengladbach","42":"Wuppertal","44":"Dortmund","45":"Essen","46":"Oberhausen","47":"Duisburg","48":"Münster","49":"Osnabrück","50":"Köln","51":"Köln","52":"Aachen","53":"Bonn","54":"Trier","55":"Mainz","56":"Koblenz","57":"Siegen","58":"Hagen","59":"Hamm",
+"60":"Frankfurt am Main","61":"Bad Homburg","63":"Offenbach am Main","64":"Darmstadt","65":"Wiesbaden","66":"Saarbrücken","67":"Ludwigshafen am Rhein","68":"Mannheim","69":"Heidelberg","70":"Stuttgart","71":"Ludwigsburg","72":"Tübingen","73":"Göppingen","74":"Heilbronn","75":"Pforzheim","76":"Karlsruhe","77":"Offenburg","78":"Villingen-Schwenningen","79":"Freiburg im Breisgau",
+"80":"München","81":"München","82":"Starnberg","83":"Rosenheim","84":"Landshut","85":"Ingolstadt","86":"Augsburg","87":"Kempten","88":"Ravensburg","89":"Ulm","90":"Nürnberg","91":"Erlangen","92":"Amberg","93":"Regensburg","94":"Passau","95":"Bayreuth","96":"Bamberg","97":"Würzburg","98":"Suhl","99":"Erfurt"};
+const PLZ_DE3={"213":"Lüneburg","216":"Stade","217":"Stade","263":"Wilhelmshaven","267":"Emden","274":"Cuxhaven","634":"Hanau","637":"Aschaffenburg","638":"Aschaffenburg","674":"Neustadt an der Weinstraße","676":"Kaiserslautern","768":"Landau in der Pfalz","782":"Konstanz","783":"Konstanz","784":"Konstanz","880":"Friedrichshafen","881":"Lindau","552":"Ingelheim am Rhein","555":"Bad Kreuznach","777":"Oberkirch","778":"Bühl (Baden)","016":"Meißen","066":"Naumburg (Saale)","145":"Werder (Havel)","533":"Meckenheim"};
+const PLZ_AT={"1":"Wien","2":"Wiener Neustadt","3":"St. Pölten","35":"Krems an der Donau","4":"Linz","46":"Wels","5":"Salzburg","6":"Innsbruck","67":"Bregenz","68":"Feldkirch","69":"Bregenz","7":"Eisenstadt","8":"Graz","82":"Gleisdorf","9":"Klagenfurt","95":"Villach","99":"Lienz"};
+const PLZ_CH={"1":"Lausanne","12":"Genf","19":"Sion","2":"Neuchâtel","25":"Biel/Bienne","3":"Bern","39":"Sion","4":"Basel","5":"Aarau","6":"Luzern","65":"Bellinzona","66":"Locarno","69":"Lugano","7":"Chur","72":"Davos","75":"St. Moritz","8":"Zürich","84":"Winterthur","85":"Frauenfeld","9":"St. Gallen"};
+
+/* Obstanbaugebiete */
+const REGIONS=[
+["Altes Land","DE",53.53,9.68,"Äpfel, Kirschen, Birnen, Zwetschgen"],["Bodensee","DE",47.68,9.45,"Äpfel, Birnen, Kirschen, Beerenobst"],["Rheinland (Meckenheim)","DE",50.63,7.03,"Äpfel, Birnen, Erdbeeren"],
+["Havelland (Werder)","DE",52.38,12.93,"Äpfel, Kirschen, Sanddorn, Beeren"],["Sächsisches Obstland","DE",51.18,12.88,"Äpfel, Kirschen, Pflaumen"],["Saale-Unstrut","DE",51.20,11.75,"Wein, Äpfel, Kirschen"],
+["Fränkische Schweiz","DE",49.75,11.18,"Süßkirschen, Zwetschgen"],["Rheinhessen","DE",49.97,8.06,"Kirschen, Aprikosen, Wein"],["Südpfalz","DE",49.25,8.10,"Wein, Mandeln, Esskastanien, Feigen"],
+["Ortenau","DE",48.53,8.08,"Kirschen, Zwetschgen, Erdbeeren, Esskastanien"],["Markgräflerland","DE",47.80,7.65,"Wein, Kirschen, Zwetschgen"],["Mosel","DE",49.90,6.90,"Wein, Weinbergpfirsich"],
+["Lüneburger Heide","DE",53.00,10.20,"Heidelbeeren, Preiselbeeren"],["Mecklenburg (Ludwigslust)","DE",53.33,11.50,"Sanddorn, Äpfel"],["Neckar & Remstal","DE",48.85,9.40,"Äpfel, Kirschen, Wein"],
+["Wachau","AT",48.37,15.42,"Marillen, Wein"],["Steirisches Apfelland","AT",47.20,15.80,"Äpfel, Holunder"],["Neusiedler See","AT",47.85,16.80,"Wein, Kirschen"],
+["Thurgau","CH",47.55,9.10,"Äpfel, Birnen, Kirschen"],["Wallis","CH",46.23,7.36,"Aprikosen, Äpfel, Wein"],["Tessin","CH",46.10,8.90,"Esskastanien, Feigen, Wein"],
+["Südtirol","IT",46.50,11.30,"Äpfel, Wein"],["Val di Non","IT",46.37,11.05,"Äpfel"],["Emilia-Romagna","IT",44.40,11.90,"Birnen, Pfirsiche, Kiwis"],["Ätna (Sizilien)","IT",37.50,15.00,"Blutorangen, Pistazien"],
+["Normandie","FR",49.20,0.30,"Äpfel, Birnen"],["Lothringen","FR",48.90,6.30,"Mirabellen"],["Provence","FR",43.90,5.00,"Kirschen, Melonen, Aprikosen"],
+["Huelva","ES",37.25,-6.95,"Erdbeeren, Heidelbeeren, Himbeeren"],["Valencia","ES",39.30,-0.40,"Orangen, Mandarinen, Kakis"],["Murcia","ES",38.00,-1.13,"Zitronen, Aprikosen, Pfirsiche"],
+["Lleida","ES",41.62,0.62,"Pfirsiche, Nektarinen, Birnen"],["Kanaren","ES",28.30,-16.50,"Bananen, Avocados"],["Kent","GB",51.25,0.80,"Äpfel, Kirschen, Erdbeeren"],
+["Betuwe","NL",51.90,5.40,"Äpfel, Birnen, Kirschen"],["Grójec","PL",51.87,20.87,"Äpfel"],["Kreta","GR",35.30,24.80,"Orangen, Oliven, Avocados"],
+["Spreewald","DE",51.85,14.00,"Gurken, Meerrettich, Zwiebeln","g"],["Insel Reichenau","DE",47.69,9.06,"Salate, Tomaten, Gurken","g"],["Knoblauchsland","DE",49.50,11.03,"Salate, Rettich, Tomaten, Kohl","g"],
+["Schwetzingen","DE",49.38,8.57,"Spargel","g"],["Beelitz","DE",52.24,12.97,"Spargel, Heidelbeeren","b"],["Dithmarschen","DE",54.10,9.10,"Weißkohl, Rotkohl","g"],
+["Vorgebirge (Bornheim)","DE",50.76,6.99,"Salate, Gemüse, Erdbeeren","b"],["Vorderpfalz","DE",49.40,8.30,"Radieschen, Salate, Möhren, Spargel","g"],["Fildern","DE",48.68,9.22,"Spitzkohl (Filderkraut)","g"],
+["Abensberg","DE",48.81,11.85,"Spargel","g"],["Lüneburger Heide (Spargel)","DE",52.95,10.55,"Spargel, Kartoffeln","g"],["Marchfeld","AT",48.22,16.65,"Spargel, Zwiebeln, Gemüse","g"],
+["Seeland","CH",47.00,7.10,"Gemüse, Salate","g"],["Westland","NL",52.00,4.20,"Gewächshausgemüse","g"],["Almería","ES",36.84,-2.46,"Tomaten, Paprika, Gurken aus Gewächshäusern","g"]
+];
+
+/* ---------- Hilfsfunktionen ---------- */
+function norm(s){return s.toLowerCase().replace(/ß/g,"ss").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim();}
+function dist(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const deg=(v,pos,neg)=>Math.abs(v).toFixed(2).replace(".",",")+"° "+(v>=0?pos:neg);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+
+/* ---------- Klimamodell ---------- */
+function effLat(loc){return Math.abs(loc.lat)+(loc.elev-100)/122+(loc.lage==="w"?-1.5:loc.lage==="k"?1:0);}
+function zone(e){
+  if(e<23.5)return "Tropisch";
+  if(e<30)return "Subtropisch";
+  if(e<42)return "Warm (Mittelmeerklima)";
+  if(e<48.5)return "Mild (Weinbauklima)";
+  if(e<54)return "Gemäßigt (Mitteleuropa)";
+  if(e<60)return "Kühl-gemäßigt";
+  return "Boreal bis subarktisch";
+}
+function fruitWindow(f,loc){
+  const e=loc.eff;
+  const regional=e>=f.r[0]&&e<=f.r[1];
+  const edge=regional&&(f.r[1]-e<0.8||e-f.r[0]<0.8);
+  const cool=COOL.has(f.id)&&e<43;
+  const w={f,regional,edge,cool,tooCold:e>f.r[1],y:!!f.y,st:cool?0:(f.st||0)};
+  const hemi=loc.lat<0?182:0;
+  w.gh=f.gh&&regional&&!cool?f.gh.map(x=>mod(d0(x)+hemi)):null;
+  if(f.y){w.pk=f.pk?f.pk.map(x=>mod(d0(x)+hemi)):null;}
+  else{
+    let sh=cool?0:Math.max(-40,Math.min(40,(e-(f.ref??REF))*3*(f.s??1)));
+    let [s,ps,pe,en]=(cool?COOL_H:f.h).map(d0);
+    const wraps=en<s;
+    if(wraps)sh=0; // Wintergemüse und Winterfrüchte: Ernte über den Jahreswechsel verschiebt sich kaum
+    s+=sh;ps+=sh;
+    // Späte Ernteenden: in warmen Lagen kaum früher, in kühlen Lagen begrenzt durch den ersten Frost
+    const late=x=>x>=d0("09-15")&&!wraps;
+    pe+=late(pe)&&sh<0?sh*.3:sh; en+=late(en)&&sh<0?sh*.3:sh;
+    if(!wraps&&f.s!==0&&!f.fr){
+      const frost=d0("11-10")-(e-REF)*4;
+      if(en>frost){en=Math.max(frost,s+10);pe=Math.min(pe,en);ps=Math.min(ps,pe);}
+    }
+    [w.s,w.ps,w.pe,w.e]=[s,ps,pe,en].map(x=>mod(x+hemi));
+  }
+  w.days=new Array(365);
+  for(let d=0;d<365;d++)w.days[d]=dayStatus(w,d);
+  return w;
+}
+function dayStatus(w,d){
+  if(w.y)return w.pk&&inRange(d,w.pk[0],w.pk[1])?"peak":"season";
+  if(inRange(d,w.s,w.e))return inRange(d,w.ps,w.pe)?"peak":"season";
+  if(w.gh&&inRange(d,w.gh[0],w.gh[1]))return "glass";
+  if(w.st&&inRange(d,w.e,w.e+w.st))return "store";
+  return null;
+}
+function countRange(w,from,len){const c={peak:0,season:0,store:0,glass:0};for(let i=0;i<len;i++){const s=w.days[mod(from+i)];if(s)c[s]++;}c.harvest=c.peak+c.season;return c;}
+const monthCount=(w,m)=>countRange(w,CUM[m],MD[m]);
+function halfStatus(w,m,h){
+  const len=h?MD[m]-15:15, c=countRange(w,CUM[m]+(h?15:0),len);
+  if(c.peak>=4)return "peak"; if(c.harvest>=4)return c.harvest>=len-2?"season":"edge"; if(c.glass>=6)return "glass"; if(c.store>=6)return "store"; return "";
+}
+function monthCell(w,m){const c=monthCount(w,m);if(c.peak>=6)return "peak";if(c.harvest>=12)return "season";if(c.harvest>=4)return "edge";if(c.glass>=10)return "glass";if(c.store>=10)return "store";return "";}
+
+/* ---------- Zustand ---------- */
+const now=new Date();
+const TODAY_M=now.getMonth();
+const state={loc:null,month:TODAY_M,kind:"alle",cats:new Set(KINDS.alle)};
+const DEFAULT={...byName["Frankfurt am Main"],example:true};
+
+function makeLoc(p,extra){
+  const loc={name:p.n,cc:p.cc,lat:p.lat,lon:p.lon,elev:Math.round(p.elev??100),lage:p.lage||"n",...extra};
+  loc.eff=effLat(loc);return loc;
+}
+function nearestPlace(lat,lon){let best=null,bd=1e9;for(const p of PLACES){const d=dist(lat,lon,p.lat,p.lon);if(d<bd){bd=d;best=p;}}return {p:best,d:bd};}
+
+/* ---------- Ortssuche ---------- */
+const $=id=>document.getElementById(id);
+const q=$("q"),sug=$("suggest"),hint=$("hint");
+let items=[],active=-1;
+
+function parseCoords(s){
+  let m=s.match(/^\s*(-?\d{1,2}(?:[.,]\d+)?)\s*(?:;|,\s+|\s+)\s*(-?\d{1,3}(?:[.,]\d+)?)\s*$/)||s.match(/^\s*(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)\s*$/);
+  if(!m)return null;const lat=parseFloat(m[1].replace(",",".")),lon=parseFloat(m[2].replace(",","."));
+  if(Math.abs(lat)>90||Math.abs(lon)>180)return null;return {lat,lon};
+}
+function coordItem(lat,lon,label){
+  const {p,d}=nearestPlace(lat,lon);
+  const near=d<30;
+  return {label:label||(deg(lat,"N","S")+", "+deg(lon,"O","W")),sub:near?"bei "+p.n:"Koordinaten",
+    loc:()=>makeLoc({n:label||(near?"Nähe "+p.n:"Eigener Standort"),cc:near?p.cc:"",lat,lon,elev:near?p.elev:100,lage:near?p.lage:"n"},{elevGuess:true,approxFrom:near?p.n:null})};
+}
+function plzItem(name,code,cc){const p=byName[name];if(!p)return null;return {label:"PLZ "+code,sub:"Region "+p.n+" · "+COUNTRY[cc],loc:()=>makeLoc(p,{name:p.n,plz:code})};}
+function lookup(qs){
+  const s=qs.trim();if(!s)return [];
+  const c=parseCoords(s);if(c)return [coordItem(c.lat,c.lon)];
+  if(/^\d{5}$/.test(s)){const n=PLZ_DE3[s.slice(0,3)]||PLZ_DE[s.slice(0,2)];const it=n&&plzItem(n,s,"DE");return it?[it]:[];}
+  if(/^\d{4}$/.test(s)){const out=[];
+    const a=PLZ_AT[s.slice(0,2)]||PLZ_AT[s[0]];if(a)out.push(plzItem(a,s,"AT"));
+    const ch=PLZ_CH[s.slice(0,2)]||PLZ_CH[s[0]];if(ch)out.push(plzItem(ch,s,"CH"));return out.filter(Boolean);}
+  const n=norm(s);if(n.length<2)return [];
+  const scored=[];
+  for(const p of PLACES){const nn=norm(p.n);let sc=-1;
+    if(nn===n)sc=100;else if(p.al.includes(n))sc=95;else if(nn.startsWith(n))sc=80;else if(p.key.split(" ").some(w=>w.startsWith(n)))sc=60;else if(p.key.includes(n))sc=30;
+    if(sc>=0)scored.push({sc:sc+(p.cc==="DE"||p.cc==="AT"||p.cc==="CH"?5:0),p});}
+  scored.sort((a,b)=>b.sc-a.sc||a.p.n.localeCompare(b.p.n,"de"));
+  return scored.slice(0,8).map(({p})=>({label:p.n,sub:COUNTRY[p.cc]||p.cc,loc:()=>makeLoc(p)}));
+}
+function showSuggest(list){
+  items=list;active=list.length?0:-1;
+  if(!list.length){sug.hidden=true;q.setAttribute("aria-expanded","false");return;}
+  sug.innerHTML=list.map((it,i)=>`<li role="option" id="opt${i}" aria-selected="${i===active}" data-i="${i}"><span>${esc(it.label)}</span><small>${esc(it.sub)}</small></li>`).join("");
+  sug.hidden=false;q.setAttribute("aria-expanded","true");q.setAttribute("aria-activedescendant","opt0");
+}
+function setActive(i){active=(i+items.length)%items.length;[...sug.children].forEach((li,j)=>li.setAttribute("aria-selected",j===active));q.setAttribute("aria-activedescendant","opt"+active);sug.children[active]?.scrollIntoView({block:"nearest"});}
+function choose(it){if(!it)return;setLocation(it.loc());q.value="";showSuggest([]);hint.className="hint";hint.textContent="";}
+async function submit(){
+  const list=items.length?items:lookup(q.value);
+  if(list.length){choose(list[active>=0?active:0]);return;}
+  const s=q.value.trim();if(!s)return;
+  hint.className="hint";hint.textContent="Suche online …";
+  try{
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=6&language=de&format=json&name="+encodeURIComponent(s),{signal:ctl.signal});
+    clearTimeout(t);const j=await r.json();
+    const res=(j.results||[]).map(x=>({label:x.name,sub:[x.admin1,COUNTRY[x.country_code]||x.country].filter(Boolean).join(" · "),
+      loc:()=>{const {p,d}=nearestPlace(x.latitude,x.longitude);return makeLoc({n:x.name,cc:x.country_code,lat:x.latitude,lon:x.longitude,elev:x.elevation??100,lage:d<20?p.lage:"n"});}}));
+    if(res.length){showSuggest(res);hint.textContent="Treffer aus der Online-Suche. Bitte auswählen.";}
+    else{hint.className="hint err";hint.textContent="Kein Ort mit diesem Namen gefunden. Versuche die PLZ oder die nächste größere Stadt.";}
+  }catch(e){
+    hint.className="hint err";
+    hint.textContent="„"+s+"“ ist nicht im Ortsverzeichnis. Gib die PLZ, die nächste größere Stadt oder Koordinaten wie 48.1, 11.6 ein.";
+  }
+}
+q.addEventListener("input",()=>{showSuggest(lookup(q.value));hint.className="hint";hint.textContent=items.length||!q.value.trim()?"":"Kein Treffer im Ortsverzeichnis. Mit Enter online suchen.";});
+q.addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown"&&items.length){e.preventDefault();setActive(active+1);}
+  else if(e.key==="ArrowUp"&&items.length){e.preventDefault();setActive(active-1);}
+  else if(e.key==="Enter"){e.preventDefault();submit();}
+  else if(e.key==="Escape"){showSuggest([]);}
+});
+q.addEventListener("blur",()=>setTimeout(()=>showSuggest([]),150));
+sug.addEventListener("mousedown",e=>{const li=e.target.closest("li");if(li){e.preventDefault();choose(items[+li.dataset.i]);}});
+$("go").addEventListener("click",submit);
+
+/* Standortfreigabe nur außerhalb eingebetteter Ansichten anbieten */
+let embedded=true;try{embedded=window.top!==window.self;}catch(e){}
+if(!embedded&&navigator.geolocation){
+  const g=$("geo");g.hidden=false;
+  g.addEventListener("click",()=>{hint.className="hint";hint.textContent="Standort wird ermittelt …";
+    navigator.geolocation.getCurrentPosition(pos=>{const it=coordItem(pos.coords.latitude,pos.coords.longitude);const loc=it.loc();if(loc.name==="Eigener Standort"||loc.name.startsWith("Nähe"))loc.name="Mein Standort"+(loc.approxFrom?" (bei "+loc.approxFrom+")":"");setLocation(loc);hint.textContent="";},
+      ()=>{hint.className="hint err";hint.textContent="Der Standort ist nicht verfügbar. Gib deinen Ort oder die PLZ ein.";},{timeout:8000,maximumAge:600000});});
+}
+
+/* ---------- Rendering ---------- */
+function setLocation(loc){state.loc=loc;store.set("saisonobst.loc",{...loc,example:false});render();}
+function windows(){return FRUITS.map(f=>fruitWindow(f,state.loc));}
+
+function renderMonths(){
+  $("months").innerHTML=MONTHS.map((m,i)=>`<button type="button" data-m="${i}" aria-pressed="${i===state.month}" class="${i===TODAY_M?"today":""}" title="${m}${i===TODAY_M?" (aktueller Monat)":""}">${MSHORT[i]}</button>`).join("");
+}
+$("months").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.month=+b.dataset.m;render();});
+
+function renderFilters(){
+  const kc=KINDS[state.kind];
+  $("kind").innerHTML=Object.entries(KIND_LABEL).map(([k,v])=>`<button type="button" data-kind="${k}" aria-pressed="${state.kind===k}">${v}</button>`).join("");
+  $("filters").classList.toggle("all",kc.every(k=>state.cats.has(k)));
+  $("filters").innerHTML=kc.map(k=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${state.cats.has(k)}">${CAT[k]}</button>`).join("");
+}
+$("filters").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k,kc=KINDS[state.kind];
+  if(kc.every(x=>state.cats.has(x))){state.cats=new Set([k]);}
+  else if(state.cats.has(k)){state.cats.delete(k);if(!kc.some(x=>state.cats.has(x)))state.cats=new Set(kc);}
+  else state.cats.add(k);
+  render();});
+$("kind").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;state.kind=b.dataset.kind;state.cats=new Set(KINDS[state.kind]);store.set("saisonobst.kind",state.kind);render();});
+
+function statusPill(w,m){
+  const c=monthCount(w,m);
+  if(w.y)return w.pk?(c.peak?'<span class="pill peak">Hauptsaison</span>':'<span class="pill season">ganzjährig</span>'):'<span class="pill season">ganzjährig</span>';
+  if(c.harvest<5)return c.glass>=8?'<span class="pill glass">Gewächshaus</span>':c.store?'<span class="pill store">Lagerware</span>':"";
+  const mStart=CUM[m],mEnd=CUM[m]+MD[m]-1;
+  if(c.peak>=6)return '<span class="pill peak">Haupternte</span>';
+  if(inRange(w.s,mStart,mEnd))return '<span class="pill season">Saisonstart</span>';
+  if(inRange(w.e,mStart,mEnd))return '<span class="pill season">Saisonende</span>';
+  return '<span class="pill season">Erntezeit</span>';
+}
+function seasonText(w){return w.y?"ganzjährig":fmt(w.s)+" – "+fmt(w.e);}
+function strip12(w){return MONTHS.map((_,m)=>{const s=monthCell(w,m);return `<i class="${s?"c-"+s:""}${m===state.month?" sel":""}"></i>`;}).join("");}
+function card(w,mode){
+  const m=state.month;
+  let meta=mode==="store"?"Lagerware bis "+fmt(w.e+w.st):mode==="soon"?"Ernte ab "+fmt(w.s):mode==="glass"?"Freiland: "+seasonText(w):"Ernte: "+seasonText(w);
+  return `<button type="button" class="card" data-id="${w.f.id}">
+    <span class="dot" style="--c:${w.f.c}"></span><span class="card-name">${esc(w.f.n)}</span>
+    <span class="pills">${mode==="soon"?'<span class="pill">bald</span>':statusPill(w,m)}${w.edge?'<span class="pill edge">Grenzlage</span>':""}</span>
+    <span class="card-meta">${meta}</span>
+    <span class="card-use"><span class="use-lbl">Verwendung</span> ${useText(w.f.id)}</span>
+    <span class="strip" aria-hidden="true">${strip12(w)}</span></button>`;
+}
+function group(title,key,list,mode,emptyText){
+  return `<section class="group"><div class="group-head"><span class="key ${key}"></span><h3>${title}</h3><span class="count num">${list.length}</span></div>
+  ${list.length?`<div class="cards">${list.map(w=>card(w,mode)).join("")}</div>`:`<p class="empty">${emptyText}</p>`}</section>`;
+}
+
+function render(){
+  const loc=state.loc,m=state.month,W=windows();
+  const vis=W.filter(w=>state.cats.has(w.f.k));
+  const fresh=[],glass=[],stored=[],soon=[],foreign=[];
+  const nm=(m+1)%12;
+  for(const w of vis){
+    if(!w.regional){foreign.push(w);continue;}
+    const c=monthCount(w,m);
+    if(c.harvest>=5)fresh.push({w,c});
+    else if(c.glass>=8)glass.push(w);
+    else if(c.store>=5)stored.push(w);
+    if(c.harvest<5&&monthCount(w,nm).harvest>=5)soon.push(w);
+  }
+  fresh.sort((a,b)=>(b.c.peak>0)-(a.c.peak>0)||b.c.harvest-a.c.harvest||a.w.f.n.localeCompare(b.w.f.n,"de"));
+  stored.sort((a,b)=>a.f.n.localeCompare(b.f.n,"de"));
+  const isToday=m===TODAY_M;
+  $("title").textContent=`${MONTHS[m]} in ${loc.name}`;
+  $("counts").innerHTML=`<span><b>${fresh.length}</b> erntefrisch</span>${glass.length?`<span><b>${glass.length}</b> aus dem Gewächshaus</span>`:""}<span><b>${stored.length}</b> aus dem Lager</span><span><b>${soon.length}</b> ab ${MONTHS[nm]}</span>${loc.example?'<span>Beispielort, gib oben deinen Ort ein</span>':""}`;
+
+  $("main").innerHTML=
+    group("Erntefrisch aus der Region","c-peak",fresh.map(x=>x.w),"fresh","In diesem Monat wird bei dir in den gewählten Kategorien nichts geerntet.")+
+    (glass.length?group("Aus Gewächshaus und Folientunnel","c-glass",glass,"glass",""):"")+
+    group("Aus regionalem Lager","c-store",stored,"store","Keine regionale Lagerware in den gewählten Kategorien.")+
+    group(`Kommt im ${MONTHS[nm]}`,"c-edge",soon,"soon",`Im ${MONTHS[nm]} beginnt keine neue Ernte.`)+
+    `<section class="group"><div class="group-head"><span class="key" style="background:var(--empty)"></span><h3>Wächst bei dir nicht im Freiland</h3><span class="count num">${foreign.length}</span></div>
+     <p class="empty" style="font-size:.92rem">Diese Arten kommen an deinem Standort nur als Importware in den Handel. Antippen zeigt, wann sie im Anbaugebiet Saison haben.</p>
+     <div class="tags">${foreign.map(w=>`<button type="button" class="tag" data-id="${w.f.id}"><span class="dot" style="--c:${w.f.c}"></span>${esc(w.f.n)}</button>`).join("")}</div></section>`;
+
+  renderProfile(W);renderRegions();renderCalendar(W);renderMonths();renderFilters();
+}
+
+function renderProfile(W){
+  const loc=state.loc,e=loc.eff;
+  const shift=Math.max(-40,Math.min(40,(e-REF)*3));
+  let shiftTxt=Math.abs(shift)<4?"etwa wie im deutschen Mittel":`etwa ${Math.round(Math.abs(shift)/7)||1} ${Math.round(Math.abs(shift)/7)>1?"Wochen":"Woche"} ${shift<0?"früher":"später"} als im deutschen Mittel`;
+  if(Math.abs(shift)>=4&&Math.abs(shift)<7)shiftTxt=`einige Tage ${shift<0?"früher":"später"} als im deutschen Mittel`;
+  const apple=W.find(w=>w.f.id==="apfel");
+  const bloom=apple.regional?fmt(d0("04-25")+Math.max(-40,Math.min(40,(e-REF)*4))+(loc.lat<0?182:0)):null;
+  const inEurope=loc.lat>34&&loc.lat<72&&loc.lon>-25&&loc.lon<45;
+  const pos=Math.max(0,Math.min(100,(e-30)/(66-30)*100));
+  const KW=W.filter(w=>KINDS[state.kind].includes(w.f.k));
+  const regionalCount=KW.filter(w=>w.regional).length;
+  const noun=state.kind==="obst"?"Obstarten":state.kind==="gemuese"?"Gemüsearten":"Obst- und Gemüsearten";
+  $("profile").innerHTML=`
+    <div class="eyebrow">Dein Standort</div>
+    <div class="loc-name">${esc(loc.name)}</div>
+    <div class="loc-sub num">${loc.plz?"PLZ "+esc(loc.plz)+" · ":""}${COUNTRY[loc.cc]||loc.cc||""}${loc.cc?" · ":""}${deg(loc.lat,"N","S")}, ${deg(loc.lon,"O","W")}</div>
+    <div class="fields">
+      <label for="elev">Höhe ü. NN (m)<input id="elev" type="number" inputmode="numeric" step="10" min="-50" max="5000" value="${loc.elev}"></label>
+      <label for="lage">Lage<select id="lage">
+        <option value="n"${loc.lage==="n"?" selected":""}>normal</option>
+        <option value="w"${loc.lage==="w"?" selected":""}>warm (Flusstal, Weinbau)</option>
+        <option value="k"${loc.lage==="k"?" selected":""}>kühl (Küste, Kuppe, Senke)</option></select></label>
+    </div>
+    <dl class="facts">
+      <dt>Klima</dt><dd>${zone(e)}</dd>
+      <dt>Saison</dt><dd>${loc.lat<0?"Südhalbkugel, um ein halbes Jahr versetzt":shiftTxt}</dd>
+      ${bloom?`<dt>Apfelblüte</dt><dd>ca. ${bloom}</dd>`:""}
+      <dt>Regional</dt><dd class="num">${regionalCount} von ${KW.length} ${noun}</dd>
+    </dl>
+    <div class="gauge" aria-label="Effektiver Breitengrad ${e.toFixed(1).replace(".",",")} Grad">
+      <div class="gauge-bar"><span class="gauge-mid"></span><span class="gauge-mark" style="left:${pos}%"></span></div>
+      <div class="gauge-scale num"><span>30° warm</span><span>Referenz 51,5°</span><span>66° kühl</span></div>
+      <div class="loc-sub num" style="margin-top:6px">Effektiver Breitengrad: ${e.toFixed(1).replace(".",",")}°</div>
+    </div>
+    ${loc.elevGuess?`<p class="note">Die Höhe ist ${loc.approxFrom?"vom nächsten Ort ("+esc(loc.approxFrom)+") übernommen":"geschätzt"}. Trag deine Höhe ein, dann wird die Berechnung genauer.</p>`:""}
+    ${!inEurope?`<p class="note">Außerhalb Europas sind die Angaben nur eine grobe Näherung.</p>`:""}`;
+  $("elev").addEventListener("change",ev=>{const v=parseFloat(ev.target.value);if(!isFinite(v))return;loc.elev=Math.round(v);loc.elevGuess=false;loc.eff=effLat(loc);setLocation(loc);});
+  $("lage").addEventListener("change",ev=>{loc.lage=ev.target.value;loc.eff=effLat(loc);setLocation(loc);});
+}
+
+function renderRegions(){
+  const loc=state.loc;
+  const want=state.kind==="obst"?"o":state.kind==="gemuese"?"g":null;
+  const list=REGIONS.filter(r=>!want||(r[5]||"o")===want||r[5]==="b").map(([n,cc,lat,lon,f])=>({n,cc,f,d:dist(loc.lat,loc.lon,lat,lon)})).sort((a,b)=>a.d-b.d).slice(0,5);
+  $("regions").innerHTML=list.map(r=>`<li><span class="rn">${esc(r.n)}</span><span class="rd">≈ ${r.d<10?"<10":Math.round(r.d/5)*5} km</span><span class="rf">${esc(r.f)} · ${COUNTRY[r.cc]}</span></li>`).join("")+
+    (list[0].d>1500?`<li class="rf">Im Verzeichnis sind vor allem europäische Anbaugebiete enthalten.</li>`:"");
+}
+
+function renderCalendar(W){
+  const m=state.month;
+  const rows=W.filter(w=>w.regional&&state.cats.has(w.f.k));
+  const order=Object.keys(CAT);
+  const start=w=>w.y?999:mod(w.s-(state.loc.lat<0?182:0)+60);
+  rows.sort((a,b)=>order.indexOf(a.f.k)-order.indexOf(b.f.k)||start(a)-start(b));
+  $("cal-title").textContent=`Regionales ${KIND_NOUN[state.kind]} in ${state.loc.name}`;
+  let head=`<thead><tr><th class="rowh" scope="col">Obst</th>${MSHORT.map((s,i)=>`<th colspan="2" scope="col" class="${i===m?"sel":""}">${s}</th>`).join("")}</tr></thead>`;
+  let body="",lastCat="";
+  for(const w of rows){
+    if(w.f.k!==lastCat){lastCat=w.f.k;body+=`<tr><td class="cat-row" colspan="25">${CAT[lastCat]}</td></tr>`;}
+    let cells="";
+    for(let mm=0;mm<12;mm++)for(let h=0;h<2;h++){const s=halfStatus(w,mm,h);cells+=`<td class="cell${mm===m?" sel":""}${h===0&&mm===0?" m0":""}"><i class="${s?"c-"+s:""}"></i></td>`;}
+    body+=`<tr><th class="rowh" scope="row"><button type="button" data-id="${w.f.id}"><span class="dot" style="--c:${w.f.c}"></span>${esc(w.f.n)}</button></th>${cells}</tr>`;
+  }
+  if(!rows.length)body=`<tr><td colspan="25" style="padding:18px" class="muted">Für die gewählten Kategorien wächst an diesem Standort nichts regional.</td></tr>`;
+  $("cal").innerHTML=head+"<tbody>"+body+"</tbody>";
+}
+
+/* ---------- Detailansicht ---------- */
+const dlg=$("dlg");
+function openDetail(id){
+  const f=FRUITS.find(x=>x.id===id);if(!f)return;
+  const w=fruitWindow(f,state.loc);
+  let facts="";
+  if(w.regional){
+    facts+=`<dt>Ernte bei dir</dt><dd>${seasonText(w)}</dd>`;
+    if(!w.y)facts+=`<dt>Haupternte</dt><dd>${fmt(w.ps)} – ${fmt(w.pe)}</dd>`;
+    else if(w.pk)facts+=`<dt>Hauptsaison</dt><dd>${fmt(w.pk[0])} – ${fmt(w.pk[1])}</dd>`;
+    if(w.gh)facts+=`<dt>Gewächshaus</dt><dd>${fmt(w.gh[0])} – ${fmt(w.gh[1])}</dd>`;
+    if(w.st)facts+=`<dt>Lagerware</dt><dd>bis ${fmt(w.e+w.st)}</dd>`;
+    facts+=`<dt>Im ${MONTHS[state.month]}</dt><dd>${statusPill(w,state.month)||'<span class="pill">keine regionale Ware</span>'}</dd>`;
+  }else{
+    const origin={lat:f.ref??REF,lon:0,elev:100,lage:"n"};origin.eff=effLat(origin);
+    const wo=fruitWindow(f,origin);
+    facts+=`<dt>Bei dir</dt><dd>wächst nicht im Freiland, das Klima ist ${w.tooCold?"zu kühl":"zu warm oder hat keinen Winterfrost"}</dd>`;
+    facts+=`<dt>Saison im Anbaugebiet</dt><dd>${seasonText(wo)}${f.o?" ("+esc(f.o)+")":""}</dd>`;
+  }
+  const strip=w.regional?`<div><div class="strip" aria-hidden="true">${MONTHS.map((_,mm)=>[0,1].map(h=>{const s=halfStatus(w,mm,h);return `<i class="${s?"c-"+s:""}${mm===state.month?" sel":""}"></i>`;}).join("")).join("")}</div>
+    <div class="strip-lbl">${MSHORT.map(s=>`<span>${s}</span>`).join("")}</div></div>`:"";
+  $("dlg-body").innerHTML=`
+    <div class="dlg-head"><span class="dot" style="--c:${f.c}"></span><h2 id="dlg-title">${esc(f.n)}</h2><button class="close" type="button" aria-label="Schließen">×</button></div>
+    <div class="eyebrow">${CAT[f.k]} · ${esc(state.loc.name)}</div>
+    <dl class="facts">${facts}</dl>
+    ${w.cool&&w.regional?`<p class="note">Im warmen Klima wird ${esc(f.n)} als Wintergemüse angebaut, im Sommer ist es dort zu heiß.</p>`:""}
+    ${w.edge?`<p class="note">Grenzlage: An deinem Standort wächst ${esc(f.n)} nur in günstigen Lagen oder mit Schutz.</p>`:""}
+    ${strip}
+    <div><h4>Verwendung</h4><p>${esc(useText(f.id))}</p></div>
+    <div><h4>Typische Sorten</h4><p>${esc(f.so)}</p></div>
+    <div><h4>Tipp</h4><p>${esc(f.t)}</p></div>`;
+  dlg.querySelector(".close").addEventListener("click",()=>dlg.close());
+  if(typeof dlg.showModal==="function")dlg.showModal();else dlg.setAttribute("open","");
+}
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close();});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-id]");if(b&&!dlg.contains(b))openDetail(b.dataset.id);});
+
+/* ---------- Start ---------- */
+(function init(){
+  const saved=store.get("saisonobst.loc");
+  if(saved&&typeof saved.lat==="number"&&typeof saved.lon==="number"){saved.eff=effLat(saved);state.loc=saved;}
+  else state.loc=makeLoc(DEFAULT,{example:true});
+  const k=store.get("saisonobst.kind");if(KINDS[k]&&typeof k==="string"){state.kind=k;state.cats=new Set(KINDS[k]);}
+  render();
+})();
+</script>
+
+<script>
+/* App-Fassung: Offline-Betrieb und Installation */
+(function(){
+  const st=document.getElementById("appstate"),btn=document.getElementById("install");
+  if("serviceWorker" in navigator&&location.protocol!=="file:"){
+    const had=!!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had)st.textContent="Neue Version geladen. Sie gilt ab dem nächsten Öffnen.";});
+  }
+  let deferred=null;
+  window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;btn.hidden=false;});
+  btn.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();await deferred.userChoice.catch(()=>{});deferred=null;btn.hidden=true;});
+  window.addEventListener("appinstalled",()=>{btn.hidden=true;st.textContent="Installiert.";});
+})();
+</script>
+</body>
+</html>

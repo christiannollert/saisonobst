@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Saisonobst vor Ort</title>
+<title>Saisonobst &amp; -gemüse vor Ort</title>
 <meta name="description" content="Welches Obst und Gemüse wächst gerade bei dir? Ort oder PLZ eingeben und sehen, was frisch geerntet wird, was aus Gewächshaus oder Lager kommt und was importiert wird.">
 <meta name="theme-color" content="#F3F6F0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111713" media="(prefers-color-scheme: dark)">
@@ -20,7 +20,7 @@
   --accent:#563B8C; --accent-soft:#ECE6F6; --on-accent:#FFFFFF;
   --glass:#4E93AD;
   --peak:#2E7A3A; --season:#86BE72; --edge:#D3E9C6; --store:#D29A2E; --store-soft:#F6E7C6; --empty:#E8EDE5;
-  --warn:#9A5B12;
+  --warn:#9A5B12; --brand-obst:#D2600A; --brand-gem:#3B9A0F;
   --f-display:"Alegreya", Georgia, "Times New Roman", serif;
   --f-body:"Alegreya Sans", "Segoe UI", system-ui, sans-serif;
   --r:10px;
@@ -30,13 +30,13 @@
   --accent:#B69DEB; --accent-soft:#2A2340; --on-accent:#1A1326;
   --glass:#5FA6C0;
   --peak:#62C26B; --season:#3B7D45; --edge:#24402A; --store:#D9A13A; --store-soft:#3A2F17; --empty:#212A24;
-  --warn:#E0A75A; color-scheme:dark }}
+  --warn:#E0A75A; --brand-obst:#F59A3C; --brand-gem:#86D93A; color-scheme:dark }}
 :root[data-theme="dark"]{
   --paper:#111713; --surface:#19211C; --ink:#E4ECE5; --muted:#98A79D; --line:#2B372F;
   --accent:#B69DEB; --accent-soft:#2A2340; --on-accent:#1A1326;
   --glass:#5FA6C0;
   --peak:#62C26B; --season:#3B7D45; --edge:#24402A; --store:#D9A13A; --store-soft:#3A2F17; --empty:#212A24;
-  --warn:#E0A75A; color-scheme:dark }
+  --warn:#E0A75A; --brand-obst:#F59A3C; --brand-gem:#86D93A; color-scheme:dark }
 
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
@@ -51,7 +51,9 @@ button,input,select{font:inherit;color:inherit}
 /* Kopf */
 .masthead{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px 40px;align-items:end;padding-block:36px 20px}
 .brand h1{font-size:clamp(2.4rem,5vw,3.6rem);font-weight:800;letter-spacing:-.01em}
-.brand h1 span{color:var(--accent)}
+.brand h1 .b-obst{color:var(--brand-obst)}
+.brand h1 .b-gem{white-space:nowrap}
+.brand h1 .b-gem b{color:var(--brand-gem);font-weight:inherit}
 .brand p{margin:6px 0 0;font-size:1.1rem;color:var(--muted);max-width:40ch}
 .search{position:relative;display:flex;flex-direction:column;gap:6px}
 .search label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
@@ -97,9 +99,8 @@ button,input,select{font:inherit;color:inherit}
 .group-head .key{width:12px;height:12px;border-radius:3px;flex:none}
 .group p.empty{margin:0;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;text-align:left;padding:12px 14px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s, transform .15s}
+.card{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 10px;align-items:center;text-align:left;padding:12px 14px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s, transform .15s}
 .card:hover{border-color:var(--accent);transform:translateY(-1px)}
-.dot{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
 .card-name{font-weight:700;font-size:1.05rem;line-height:1.2}
 .card-meta{grid-column:1 / -1;font-size:.86rem;color:var(--muted)}
 .card-use{grid-column:1 / -1;font-size:.88rem;line-height:1.35;color:var(--ink)}
@@ -120,9 +121,8 @@ button,input,select{font:inherit;color:inherit}
 .c-edge{background:var(--edge)!important}
 .c-store{background:repeating-linear-gradient(135deg,var(--store) 0 3px,var(--store-soft) 3px 6px)!important}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px 4px 8px;font-size:.9rem;cursor:pointer;color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 11px;font-size:.9rem;cursor:pointer;color:var(--muted)}
 .tag:hover{border-color:var(--accent);color:var(--ink)}
-.tag .dot{width:9px;height:9px}
 
 /* Seitenspalte */
 aside{display:flex;flex-direction:column;gap:20px;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px)}
@@ -165,7 +165,6 @@ th.rowh{position:sticky;left:0;z-index:2;background:var(--surface);text-align:le
 thead th.rowh{z-index:3}
 th.rowh button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:6px 0;cursor:pointer;text-align:left;font-weight:500;text-transform:none;letter-spacing:0;font-size:.95rem;color:var(--ink)}
 th.rowh button:hover{color:var(--accent)}
-th.rowh .dot{width:10px;height:10px;flex:none}
 tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--paper) 45%,transparent)}
 td.cell{padding:5px 1px}
 td.cell i{display:block;height:14px;border-radius:2px;background:var(--empty)}
@@ -178,7 +177,6 @@ dialog{border:0;border-radius:14px;padding:0;max-width:min(560px,calc(100vw - 32
 dialog::backdrop{background:rgba(10,15,12,.45)}
 .dlg{padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px}
 .dlg-head{display:flex;align-items:center;gap:12px}
-.dlg-head .dot{width:22px;height:22px}
 .dlg-head h2{font-size:1.7rem;flex:1}
 .close{border:0;background:var(--empty);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.2rem;line-height:1}
 .dlg .facts{font-size:.98rem}
@@ -224,7 +222,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 <div class="wrap">
   <header class="masthead">
     <div class="brand">
-      <h1>Saison<span>obst</span> &amp; Gemüse</h1>
+      <h1>Saison<span class="b-obst">obst</span> <span class="b-gem">&amp;&nbsp;<b>-gemüse</b></span></h1>
       <p>Was bei dir gerade reift und wächst, was aus dem regionalen Lager kommt und was importiert wird.</p>
     </div>
     <div class="search">
@@ -323,59 +321,59 @@ KINDS.alle=[...KINDS.obst,...KINDS.gemuese];
 const KIND_LABEL={alle:"Beides",obst:"Obst",gemuese:"Gemüse"};
 const KIND_NOUN={alle:"Obst und Gemüse",obst:"Obst",gemuese:"Gemüse"};
 const FRUITS=[
- {id:"apfel",n:"Apfel",k:"kern",c:"#C8372D",h:["07-20","09-01","10-20","11-10"],st:220,r:[34,63],so:"Elstar, Boskoop, Jonagold, Braeburn, Topaz, Gala, Cox Orange, Holsteiner Cox, Santana",t:"Aus kontrollierter Lagerung gibt es regionale Äpfel bis in den Frühsommer. Kühl und getrennt von anderem Obst lagern, denn Äpfel geben Ethylen ab und lassen Nachbarn schneller reifen."},
- {id:"birne",n:"Birne",k:"kern",c:"#B3B23A",h:["08-01","08-25","10-05","10-31"],st:130,r:[34,60],so:"Williams Christ, Conference, Alexander Lucas, Gute Luise, Clapps Liebling",t:"Viele Sorten werden hart gepflückt und reifen bei Zimmertemperatur in wenigen Tagen nach."},
- {id:"quitte",n:"Quitte",k:"kern",c:"#E0B42F",h:["10-01","10-05","10-31","11-15"],st:60,r:[35,55],so:"Konstantinopeler Apfelquitte, Bereczki, Portugiesische Birnenquitte",t:"Roh kaum essbar, ideal für Gelee, Mus und Quittenbrot. Den Flaum vor dem Kochen abreiben."},
- {id:"mispel",n:"Mispel",k:"kern",c:"#8A5A35",fr:1,h:["10-20","11-01","11-30","12-15"],st:30,r:[38,55],so:"Holländische Großfrüchtige, Westerveld",t:"Erst nach Frost oder längerem Lagern weich und dann süß-säuerlich."},
- {id:"suesskirsche",n:"Süßkirsche",k:"stein",c:"#9E1B32",h:["06-01","06-10","07-25","08-15"],r:[35,58],so:"Burlat, Kordia, Regina, Hedelfinger, Schneiders Späte Knorpelkirsche",t:"Kirschen reifen nicht nach. Mit Stiel kaufen und ungewaschen im Kühlschrank lagern, dann halten sie zwei bis drei Tage."},
- {id:"sauerkirsche",n:"Sauerkirsche",k:"stein",c:"#C0283C",h:["07-01","07-05","08-10","08-31"],r:[38,62],so:"Schattenmorelle, Morina, Achat, Safir",t:"Zum Backen, Einkochen und für Saft. Die Schattenmorelle ist die klassische Sorte."},
- {id:"zwetschge",n:"Pflaume & Zwetschge",k:"stein",c:"#4B3A7A",h:["07-10","08-01","09-30","10-20"],r:[36,60],so:"Bühler Frühzwetschge, Cacaks Schöne, Hanita, Presenta, Hauszwetschge",t:"Zwetschgen sind länglicher und fester als runde Pflaumen und behalten beim Backen ihre Form."},
- {id:"mirabelle",n:"Mirabelle",k:"stein",c:"#E8B923",h:["07-25","08-05","08-31","09-20"],r:[40,56],so:"Mirabelle von Nancy, Mirabelle von Metz",t:"Klein, gelb und sehr süß. Lothringen ist das bekannteste Anbaugebiet."},
- {id:"reneklode",n:"Reneklode",k:"stein",c:"#8DB04A",h:["07-20","08-01","08-25","09-10"],r:[39,56],so:"Große Grüne Reneklode, Oullins Reneklode, Graf Althans",t:"Grüne bis goldgelbe Pflaumenart, sehr saftig und aromatisch."},
- {id:"aprikose",n:"Aprikose (Marille)",k:"stein",c:"#F08A3C",h:["07-01","07-10","07-31","08-20"],r:[34,52],so:"Wachauer Marille (Klosterneuburger), Bergeron, Hargrand, Orangered",t:"Braucht warme Lagen und ist spätfrostgefährdet. In Österreich heißt sie Marille."},
- {id:"pfirsich",n:"Pfirsich & Nektarine",k:"stein",c:"#F4A06B",h:["07-01","07-20","08-31","09-30"],r:[33,52],so:"Roter Weinbergpfirsich, Redhaven, Benedicte, Revita",t:"Weinbergpfirsiche sind klein und rotfleischig. Sie werden vor allem zu Marmelade und Likör verarbeitet."},
- {id:"erdbeere",n:"Erdbeere",k:"beere",c:"#E0323C",gh:["04-10","05-15"],h:["05-10","05-25","07-10","10-20"],r:[30,66],so:"Clery, Elsanta, Malwina, Sonata, Korona, Mieze Schindler",t:"Freilandware gibt es ab Ende Mai. Folientunnel und mehrmals tragende Sorten verlängern die Saison bis in den Herbst."},
- {id:"himbeere",n:"Himbeere",k:"beere",c:"#D6336C",gh:["05-15","06-10"],h:["06-10","07-01","07-31","10-31"],r:[36,65],so:"Tulameen, Glen Ample, Autumn Bliss, Polka",t:"Sommerhimbeeren tragen im Juli, Herbsthimbeeren bis zum ersten Frost."},
- {id:"brombeere",n:"Brombeere",k:"beere",c:"#3A2440",h:["07-10","08-01","08-31","10-10"],r:[34,58],so:"Loch Ness, Theodor Reimers, Navaho, Thornfree",t:"Nur vollreif pflücken, Brombeeren reifen nicht nach."},
- {id:"rjoh",n:"Rote Johannisbeere",k:"beere",c:"#D7263D",st:30,h:["06-15","07-01","08-10","09-15"],r:[40,66],so:"Jonkheer van Tets, Rovada, Rolan, Weiße Versailler",t:"Ganze Rispen ernten und die Beeren erst kurz vor der Verwendung abstreifen."},
- {id:"sjoh",n:"Schwarze Johannisbeere",k:"beere",c:"#2B1B30",h:["06-20","07-01","07-31","08-20"],r:[40,66],so:"Titania, Ometa, Ben Lomond",t:"Sehr reich an Vitamin C. Herb im Geschmack, gut für Saft und Gelee."},
- {id:"stachel",n:"Stachelbeere",k:"beere",c:"#9CBF5A",h:["06-10","06-20","07-25","08-15"],r:[41,64],so:"Invicta, Hinnonmäki Rot, Pax",t:"Unreif grün geerntet zum Backen, vollreif süß zum Naschen."},
- {id:"heidel",n:"Heidelbeere",k:"beere",c:"#3E4F9E",h:["06-20","07-01","08-31","10-10"],r:[35,68],so:"Duke, Bluecrop, Elliott, Reka",t:"Kulturheidelbeeren sind innen hell. Wilde Waldheidelbeeren sind kleiner und färben stark."},
- {id:"traube",n:"Weintraube",k:"beere",c:"#7A4C8F",h:["08-15","09-01","10-15","10-31"],r:[33,52.5],so:"Tafeltrauben: Muscat bleu, Venus, Vanessa, Phoenix",t:"Regionale Tafeltrauben sind meist pilzwiderstandsfähige Sorten, die ohne viel Pflanzenschutz auskommen."},
- {id:"kiwibeere",n:"Kiwibeere",k:"beere",c:"#7FA33A",h:["09-10","09-20","10-15","10-31"],r:[38,55],so:"Weiki, Issai, Ken's Red",t:"Stachelbeergroße Kiwis mit glatter, essbarer Schale. Winterhart bis etwa −25 °C."},
- {id:"aronia",n:"Aronia",k:"beere",c:"#2E1F2A",h:["08-10","08-20","09-15","10-01"],r:[42,64],so:"Nero, Viking",t:"Herb und adstringierend, meist als Saft oder getrocknet."},
- {id:"preisel",n:"Preiselbeere",k:"wild",c:"#B3202E",h:["08-15","09-01","09-30","10-15"],r:[44,70],so:"Wildsammlung, Kultursorten Red Pearl, Koralle",t:"Wächst wild in Nadelwäldern und Heiden. Roh herb, klassisch als Kompott."},
- {id:"sanddorn",n:"Sanddorn",k:"wild",c:"#F28C1E",fr:1,h:["08-15","09-01","10-10","11-15"],r:[42,68],so:"Leikora, Habego, Hergo",t:"Sehr reich an Vitamin C. Wächst an Küsten und auf Sandböden, angebaut etwa in Brandenburg und Mecklenburg."},
- {id:"holunder",n:"Holunderbeere",k:"wild",c:"#3B2A3F",h:["08-15","09-01","09-30","10-10"],r:[36,63],so:"Haschberg, Sampo, Wildsammlung",t:"Roh leicht giftig. Nur gekocht verwenden, etwa als Saft oder Suppe."},
- {id:"schlehe",n:"Schlehe",k:"wild",c:"#3D4A7A",fr:1,h:["10-01","10-20","11-30","12-15"],r:[38,60],so:"Wildsammlung",t:"Nach dem ersten Frost weniger herb. Für Likör, Gelee und Saft."},
- {id:"hagebutte",n:"Hagebutte",k:"wild",c:"#D2462A",fr:1,h:["09-10","09-25","10-31","11-30"],r:[36,64],so:"Hundsrose, Kartoffelrose, Wildsammlung",t:"Die Frucht der Wildrose. Für Mus und Tee Kerne und Härchen entfernen."},
- {id:"kornel",n:"Kornelkirsche",k:"wild",c:"#B3122E",h:["08-10","08-20","09-15","09-30"],r:[38,56],so:"Jolico, Kasanlak, Wildsammlung",t:"Reife Früchte sind dunkelrot und lösen sich leicht. Säuerlich, gut für Marmelade."},
- {id:"felsenbirne",n:"Felsenbirne",k:"wild",c:"#4A3A6B",h:["06-10","06-20","07-10","07-25"],r:[40,62],so:"Kupfer-Felsenbirne, Erdbeer-Felsenbirne, Wildsammlung",t:"Reif sind die Beeren blauschwarz und schmecken süß mit leichter Marzipannote. Vögel sind oft schneller, also rechtzeitig pflücken."},
- {id:"vogelbeere",n:"Vogelbeere",k:"wild",c:"#E0521E",fr:1,h:["08-20","09-01","10-10","10-31"],r:[40,68],so:"Mährische Eberesche (süßer), Wildsammlung",t:"Roh bitter und unbekömmlich. Gekocht als Gelee oder gebrannt als Schnaps."},
- {id:"moltebeere",n:"Moltebeere",k:"wild",c:"#F0A24A",ref:63,h:["07-20","07-28","08-10","08-20"],r:[57,72],o:"Skandinavien",so:"Wildsammlung",t:"Wächst in Mooren Skandinaviens und ist in Finnland und Norwegen eine begehrte Wildfrucht."},
- {id:"walnuss",n:"Walnuss",k:"nuss",c:"#8B6A43",h:["09-15","09-25","10-20","10-31"],st:120,r:[33,56],so:"Weinsberg 1, Geisenheim 139, Lara, Franquette",t:"Die grüne Schale platzt bei Reife auf. Gut getrocknet halten Walnüsse bis zum nächsten Sommer."},
- {id:"hasel",n:"Haselnuss",k:"nuss",c:"#A3773F",h:["09-01","09-10","10-10","10-31"],st:120,r:[35,60],so:"Hallesche Riesen, Lambertsnuss, Corabel",t:"Fällt reif von selbst aus der Hülle. Trocken gelagert monatelang haltbar."},
- {id:"kastanie",n:"Esskastanie (Marone)",k:"nuss",c:"#7A4A2A",h:["09-25","10-05","10-31","11-15"],st:60,r:[36,51],so:"Ecker, Marigoule, Bouche de Bétizac, Pfälzer Wildkastanien",t:"Wächst in milden Lagen wie Pfalz, Ortenau und Tessin. Vor dem Rösten kreuzweise einschneiden."},
- {id:"mandel",n:"Mandel",k:"nuss",c:"#CBA77A",ref:40,h:["08-01","08-15","09-15","09-30"],st:270,r:[30,49],o:"Spanien, Italien, Kalifornien",so:"Marcona, Largueta, Pfälzer Mandelsorten",t:"In Deutschland nur in sehr milden Lagen wie an der Südlichen Weinstraße."},
- {id:"feige",n:"Feige",k:"sued",c:"#6B3A5A",ref:40,s:.5,h:["08-01","08-20","09-30","10-15"],r:[28,49.3],o:"Mittelmeerraum",so:"Brown Turkey, Dalmatie, Ronde de Bordeaux",t:"Reife Feigen geben auf Druck leicht nach. Sie sind empfindlich und sollten schnell gegessen werden."},
- {id:"orange",n:"Orange",k:"sued",c:"#F28C28",ref:38,s:0,h:["11-15","12-15","03-15","05-31"],r:[24,42],o:"Spanien, Italien, Griechenland",so:"Navelina, Navel Lane Late, Valencia Late, Tarocco und Moro (Blutorangen)",t:"Navel-Orangen im Winter, Valencia-Orangen bis in den Frühsommer, Blutorangen von Januar bis März."},
- {id:"mandarine",n:"Mandarine & Clementine",k:"sued",c:"#F6A12B",ref:38,s:0,h:["10-15","11-01","01-15","02-28"],r:[25,42.5],o:"Spanien, Italien, Marokko",so:"Clemenules, Nadorcott, Satsuma, Ortanique",t:"Clementinen sind meist kernlos, Satsumas werden besonders früh reif."},
- {id:"zitrone",n:"Zitrone",k:"sued",c:"#E8D33A",ref:38,s:0,h:["10-15","11-15","04-15","06-15"],r:[24,41],o:"Spanien, Italien, Türkei",so:"Primofiori, Verna, Femminello, Amalfi-Zitrone",t:"Hauptsaison ist der Winter. Sommerzitronen (Verdelli) ergänzen das Angebot."},
- {id:"kaki",n:"Kaki",k:"sued",c:"#E8762C",ref:40,s:.5,h:["10-10","10-25","11-30","12-31"],r:[30,46.8],o:"Spanien, Italien",so:"Rojo Brillante (Persimon), Tipo, Fuyu",t:"Adstringierende Sorten erst sehr weich essen. Persimon und Sharon sind auch fest genießbar."},
- {id:"granat",n:"Granatapfel",k:"sued",c:"#B52235",ref:38,s:.5,h:["09-20","10-01","11-15","12-15"],st:60,r:[28,44.5],o:"Spanien, Türkei, Israel",so:"Mollar de Elche, Wonderful, Hicaz",t:"Die Kerne lösen sich am leichtesten unter Wasser aus der Frucht."},
- {id:"olive",n:"Olive",k:"sued",c:"#6F7A2E",ref:40,s:.3,h:["10-01","10-20","12-15","01-31"],r:[28,44.5],o:"Mittelmeerraum",so:"Kalamata, Taggiasca, Manzanilla, Leccino",t:"Frisch vom Baum ungenießbar bitter. Erst das Einlegen in Lake macht Oliven essbar."},
- {id:"kiwi",n:"Kiwi",k:"sued",c:"#8C7B4A",ref:40,s:.5,h:["10-20","11-01","11-30","12-10"],st:150,r:[33,47.5],o:"Italien, Griechenland, Neuseeland",so:"Hayward, Soreli, Zespri Gold",t:"Hart geerntet und lange lagerfähig. Neben Äpfeln gelagert reift sie schneller."},
- {id:"melone",n:"Zuckermelone",k:"sued",c:"#E9B36A",oref:40,h:["07-25","08-05","08-31","09-15"],r:[25,52],o:"Spanien, Italien",so:"Cantaloupe, Charentais, Galia, Honigmelone",t:"Eine reife Melone duftet am Stielansatz süß."},
- {id:"kaktusfeige",n:"Kaktusfeige",k:"sued",c:"#D9534F",ref:37,h:["08-01","08-15","09-30","10-31"],r:[24,40],o:"Sizilien, Spanien, Nordafrika",so:"Sanguigna, Sulfarina, Muscaredda",t:"Vorsicht, feine Stacheln. Mit Handschuhen schälen."},
- {id:"wollmispel",n:"Japanische Wollmispel",k:"sued",c:"#EFA640",ref:38,h:["04-15","05-01","05-31","06-15"],r:[26,42],o:"Spanien, Italien",so:"Algerie, Tanaka",t:"Frühe Frucht des Mittelmeerraums, in Italien Nespola, in Spanien Níspero genannt."},
- {id:"mango",n:"Mango",k:"tropen",c:"#F3B33D",ref:20,h:["03-15","04-15","07-15","08-31"],r:[0,32],o:"Indien, Mexiko, Peru, Westafrika",so:"Alphonso, Kent, Keitt, Tommy Atkins",t:"Die Erntezeit unterscheidet sich je nach Anbauland und Sorte stark."},
- {id:"banane",n:"Banane",k:"tropen",c:"#EFD54A",y:true,r:[0,30],o:"Ecuador, Kolumbien, Kanaren",so:"Cavendish, Plátano de Canarias, Babybanane",t:"Wird grün geerntet und reift nach. In den Tropen das ganze Jahr verfügbar."},
- {id:"ananas",n:"Ananas",k:"tropen",c:"#D9B23A",y:true,pk:["03-01","06-30"],r:[0,26],o:"Costa Rica, Ghana",so:"MD2 (Extra Sweet), Queen Victoria",t:"Reift nach der Ernte kaum nach. Reif riecht sie süß am Stielansatz."},
- {id:"papaya",n:"Papaya",k:"tropen",c:"#F0883E",y:true,r:[0,27],o:"Brasilien, Mexiko",so:"Formosa, Solo",t:"In den Tropen ganzjährig. Die Kerne sind essbar und schmecken pfeffrig."},
- {id:"avocado",n:"Avocado",k:"tropen",c:"#4E6B2E",ref:36,s:0,h:["11-01","12-01","04-30","05-31"],r:[10,40],o:"Spanien, Peru, Mexiko",so:"Hass, Fuerte, Bacon",t:"Hass reift im Winter und Frühjahr. Nach der Ernte bei Zimmertemperatur nachreifen lassen."},
- {id:"passion",n:"Passionsfrucht",k:"tropen",c:"#6B3B6E",y:true,r:[0,30],o:"Kolumbien, Kenia",so:"Maracuja (gelb), Purpurgranadilla",t:"Reif, wenn die Schale schrumpelig wird."},
- {id:"litschi",n:"Litschi",k:"tropen",c:"#D64550",ref:22,h:["05-15","06-01","07-15","07-31"],r:[17,28],o:"China, Thailand, Madagaskar",so:"Mauritius, Feizixiao",t:"Kurze Saison im Frühsommer. Die Schale lässt sich leicht abziehen."},
- {id:"dattel",n:"Dattel",k:"tropen",c:"#8A5A2B",ref:28,s:.5,h:["08-15","09-15","11-15","12-15"],st:180,r:[20,34],o:"Tunesien, Israel, Ägypten",so:"Deglet Nour, Medjool",t:"Frisch im Herbst, getrocknet das ganze Jahr."}
+ {id:"apfel",n:"Apfel",k:"kern",h:["07-20","09-01","10-20","11-10"],st:220,r:[34,63],so:"Elstar, Boskoop, Jonagold, Braeburn, Topaz, Gala, Cox Orange, Holsteiner Cox, Santana",t:"Aus kontrollierter Lagerung gibt es regionale Äpfel bis in den Frühsommer. Kühl und getrennt von anderem Obst lagern, denn Äpfel geben Ethylen ab und lassen Nachbarn schneller reifen."},
+ {id:"birne",n:"Birne",k:"kern",h:["08-01","08-25","10-05","10-31"],st:130,r:[34,60],so:"Williams Christ, Conference, Alexander Lucas, Gute Luise, Clapps Liebling",t:"Viele Sorten werden hart gepflückt und reifen bei Zimmertemperatur in wenigen Tagen nach."},
+ {id:"quitte",n:"Quitte",k:"kern",h:["10-01","10-05","10-31","11-15"],st:60,r:[35,55],so:"Konstantinopeler Apfelquitte, Bereczki, Portugiesische Birnenquitte",t:"Roh kaum essbar, ideal für Gelee, Mus und Quittenbrot. Den Flaum vor dem Kochen abreiben."},
+ {id:"mispel",n:"Mispel",k:"kern",fr:1,h:["10-20","11-01","11-30","12-15"],st:30,r:[38,55],so:"Holländische Großfrüchtige, Westerveld",t:"Erst nach Frost oder längerem Lagern weich und dann süß-säuerlich."},
+ {id:"suesskirsche",n:"Süßkirsche",k:"stein",h:["06-01","06-10","07-25","08-15"],r:[35,58],so:"Burlat, Kordia, Regina, Hedelfinger, Schneiders Späte Knorpelkirsche",t:"Kirschen reifen nicht nach. Mit Stiel kaufen und ungewaschen im Kühlschrank lagern, dann halten sie zwei bis drei Tage."},
+ {id:"sauerkirsche",n:"Sauerkirsche",k:"stein",h:["07-01","07-05","08-10","08-31"],r:[38,62],so:"Schattenmorelle, Morina, Achat, Safir",t:"Zum Backen, Einkochen und für Saft. Die Schattenmorelle ist die klassische Sorte."},
+ {id:"zwetschge",n:"Pflaume & Zwetschge",k:"stein",h:["07-10","08-01","09-30","10-20"],r:[36,60],so:"Bühler Frühzwetschge, Cacaks Schöne, Hanita, Presenta, Hauszwetschge",t:"Zwetschgen sind länglicher und fester als runde Pflaumen und behalten beim Backen ihre Form."},
+ {id:"mirabelle",n:"Mirabelle",k:"stein",h:["07-25","08-05","08-31","09-20"],r:[40,56],so:"Mirabelle von Nancy, Mirabelle von Metz",t:"Klein, gelb und sehr süß. Lothringen ist das bekannteste Anbaugebiet."},
+ {id:"reneklode",n:"Reneklode",k:"stein",h:["07-20","08-01","08-25","09-10"],r:[39,56],so:"Große Grüne Reneklode, Oullins Reneklode, Graf Althans",t:"Grüne bis goldgelbe Pflaumenart, sehr saftig und aromatisch."},
+ {id:"aprikose",n:"Aprikose (Marille)",k:"stein",h:["07-01","07-10","07-31","08-20"],r:[34,52],so:"Wachauer Marille (Klosterneuburger), Bergeron, Hargrand, Orangered",t:"Braucht warme Lagen und ist spätfrostgefährdet. In Österreich heißt sie Marille."},
+ {id:"pfirsich",n:"Pfirsich & Nektarine",k:"stein",h:["07-01","07-20","08-31","09-30"],r:[33,52],so:"Roter Weinbergpfirsich, Redhaven, Benedicte, Revita",t:"Weinbergpfirsiche sind klein und rotfleischig. Sie werden vor allem zu Marmelade und Likör verarbeitet."},
+ {id:"erdbeere",n:"Erdbeere",k:"beere",gh:["04-10","05-15"],h:["05-10","05-25","07-10","10-20"],r:[30,66],so:"Clery, Elsanta, Malwina, Sonata, Korona, Mieze Schindler",t:"Freilandware gibt es ab Ende Mai. Folientunnel und mehrmals tragende Sorten verlängern die Saison bis in den Herbst."},
+ {id:"himbeere",n:"Himbeere",k:"beere",gh:["05-15","06-10"],h:["06-10","07-01","07-31","10-31"],r:[36,65],so:"Tulameen, Glen Ample, Autumn Bliss, Polka",t:"Sommerhimbeeren tragen im Juli, Herbsthimbeeren bis zum ersten Frost."},
+ {id:"brombeere",n:"Brombeere",k:"beere",h:["07-10","08-01","08-31","10-10"],r:[34,58],so:"Loch Ness, Theodor Reimers, Navaho, Thornfree",t:"Nur vollreif pflücken, Brombeeren reifen nicht nach."},
+ {id:"rjoh",n:"Rote Johannisbeere",k:"beere",st:30,h:["06-15","07-01","08-10","09-15"],r:[40,66],so:"Jonkheer van Tets, Rovada, Rolan, Weiße Versailler",t:"Ganze Rispen ernten und die Beeren erst kurz vor der Verwendung abstreifen."},
+ {id:"sjoh",n:"Schwarze Johannisbeere",k:"beere",h:["06-20","07-01","07-31","08-20"],r:[40,66],so:"Titania, Ometa, Ben Lomond",t:"Sehr reich an Vitamin C. Herb im Geschmack, gut für Saft und Gelee."},
+ {id:"stachel",n:"Stachelbeere",k:"beere",h:["06-10","06-20","07-25","08-15"],r:[41,64],so:"Invicta, Hinnonmäki Rot, Pax",t:"Unreif grün geerntet zum Backen, vollreif süß zum Naschen."},
+ {id:"heidel",n:"Heidelbeere",k:"beere",h:["06-20","07-01","08-31","10-10"],r:[35,68],so:"Duke, Bluecrop, Elliott, Reka",t:"Kulturheidelbeeren sind innen hell. Wilde Waldheidelbeeren sind kleiner und färben stark."},
+ {id:"traube",n:"Weintraube",k:"beere",h:["08-15","09-01","10-15","10-31"],r:[33,52.5],so:"Tafeltrauben: Muscat bleu, Venus, Vanessa, Phoenix",t:"Regionale Tafeltrauben sind meist pilzwiderstandsfähige Sorten, die ohne viel Pflanzenschutz auskommen."},
+ {id:"kiwibeere",n:"Kiwibeere",k:"beere",h:["09-10","09-20","10-15","10-31"],r:[38,55],so:"Weiki, Issai, Ken's Red",t:"Stachelbeergroße Kiwis mit glatter, essbarer Schale. Winterhart bis etwa −25 °C."},
+ {id:"aronia",n:"Aronia",k:"beere",h:["08-10","08-20","09-15","10-01"],r:[42,64],so:"Nero, Viking",t:"Herb und adstringierend, meist als Saft oder getrocknet."},
+ {id:"preisel",n:"Preiselbeere",k:"wild",h:["08-15","09-01","09-30","10-15"],r:[44,70],so:"Wildsammlung, Kultursorten Red Pearl, Koralle",t:"Wächst wild in Nadelwäldern und Heiden. Roh herb, klassisch als Kompott."},
+ {id:"sanddorn",n:"Sanddorn",k:"wild",fr:1,h:["08-15","09-01","10-10","11-15"],r:[42,68],so:"Leikora, Habego, Hergo",t:"Sehr reich an Vitamin C. Wächst an Küsten und auf Sandböden, angebaut etwa in Brandenburg und Mecklenburg."},
+ {id:"holunder",n:"Holunderbeere",k:"wild",h:["08-15","09-01","09-30","10-10"],r:[36,63],so:"Haschberg, Sampo, Wildsammlung",t:"Roh leicht giftig. Nur gekocht verwenden, etwa als Saft oder Suppe."},
+ {id:"schlehe",n:"Schlehe",k:"wild",fr:1,h:["10-01","10-20","11-30","12-15"],r:[38,60],so:"Wildsammlung",t:"Nach dem ersten Frost weniger herb. Für Likör, Gelee und Saft."},
+ {id:"hagebutte",n:"Hagebutte",k:"wild",fr:1,h:["09-10","09-25","10-31","11-30"],r:[36,64],so:"Hundsrose, Kartoffelrose, Wildsammlung",t:"Die Frucht der Wildrose. Für Mus und Tee Kerne und Härchen entfernen."},
+ {id:"kornel",n:"Kornelkirsche",k:"wild",h:["08-10","08-20","09-15","09-30"],r:[38,56],so:"Jolico, Kasanlak, Wildsammlung",t:"Reife Früchte sind dunkelrot und lösen sich leicht. Säuerlich, gut für Marmelade."},
+ {id:"felsenbirne",n:"Felsenbirne",k:"wild",h:["06-10","06-20","07-10","07-25"],r:[40,62],so:"Kupfer-Felsenbirne, Erdbeer-Felsenbirne, Wildsammlung",t:"Reif sind die Beeren blauschwarz und schmecken süß mit leichter Marzipannote. Vögel sind oft schneller, also rechtzeitig pflücken."},
+ {id:"vogelbeere",n:"Vogelbeere",k:"wild",fr:1,h:["08-20","09-01","10-10","10-31"],r:[40,68],so:"Mährische Eberesche (süßer), Wildsammlung",t:"Roh bitter und unbekömmlich. Gekocht als Gelee oder gebrannt als Schnaps."},
+ {id:"moltebeere",n:"Moltebeere",k:"wild",ref:63,h:["07-20","07-28","08-10","08-20"],r:[57,72],o:"Skandinavien",so:"Wildsammlung",t:"Wächst in Mooren Skandinaviens und ist in Finnland und Norwegen eine begehrte Wildfrucht."},
+ {id:"walnuss",n:"Walnuss",k:"nuss",h:["09-15","09-25","10-20","10-31"],st:120,r:[33,56],so:"Weinsberg 1, Geisenheim 139, Lara, Franquette",t:"Die grüne Schale platzt bei Reife auf. Gut getrocknet halten Walnüsse bis zum nächsten Sommer."},
+ {id:"hasel",n:"Haselnuss",k:"nuss",h:["09-01","09-10","10-10","10-31"],st:120,r:[35,60],so:"Hallesche Riesen, Lambertsnuss, Corabel",t:"Fällt reif von selbst aus der Hülle. Trocken gelagert monatelang haltbar."},
+ {id:"kastanie",n:"Esskastanie (Marone)",k:"nuss",h:["09-25","10-05","10-31","11-15"],st:60,r:[36,51],so:"Ecker, Marigoule, Bouche de Bétizac, Pfälzer Wildkastanien",t:"Wächst in milden Lagen wie Pfalz, Ortenau und Tessin. Vor dem Rösten kreuzweise einschneiden."},
+ {id:"mandel",n:"Mandel",k:"nuss",ref:40,h:["08-01","08-15","09-15","09-30"],st:270,r:[30,49],o:"Spanien, Italien, Kalifornien",so:"Marcona, Largueta, Pfälzer Mandelsorten",t:"In Deutschland nur in sehr milden Lagen wie an der Südlichen Weinstraße."},
+ {id:"feige",n:"Feige",k:"sued",ref:40,s:.5,h:["08-01","08-20","09-30","10-15"],r:[28,49.3],o:"Mittelmeerraum",so:"Brown Turkey, Dalmatie, Ronde de Bordeaux",t:"Reife Feigen geben auf Druck leicht nach. Sie sind empfindlich und sollten schnell gegessen werden."},
+ {id:"orange",n:"Orange",k:"sued",ref:38,s:0,h:["11-15","12-15","03-15","05-31"],r:[24,42],o:"Spanien, Italien, Griechenland",so:"Navelina, Navel Lane Late, Valencia Late, Tarocco und Moro (Blutorangen)",t:"Navel-Orangen im Winter, Valencia-Orangen bis in den Frühsommer, Blutorangen von Januar bis März."},
+ {id:"mandarine",n:"Mandarine & Clementine",k:"sued",ref:38,s:0,h:["10-15","11-01","01-15","02-28"],r:[25,42.5],o:"Spanien, Italien, Marokko",so:"Clemenules, Nadorcott, Satsuma, Ortanique",t:"Clementinen sind meist kernlos, Satsumas werden besonders früh reif."},
+ {id:"zitrone",n:"Zitrone",k:"sued",ref:38,s:0,h:["10-15","11-15","04-15","06-15"],r:[24,41],o:"Spanien, Italien, Türkei",so:"Primofiori, Verna, Femminello, Amalfi-Zitrone",t:"Hauptsaison ist der Winter. Sommerzitronen (Verdelli) ergänzen das Angebot."},
+ {id:"kaki",n:"Kaki",k:"sued",ref:40,s:.5,h:["10-10","10-25","11-30","12-31"],r:[30,46.8],o:"Spanien, Italien",so:"Rojo Brillante (Persimon), Tipo, Fuyu",t:"Adstringierende Sorten erst sehr weich essen. Persimon und Sharon sind auch fest genießbar."},
+ {id:"granat",n:"Granatapfel",k:"sued",ref:38,s:.5,h:["09-20","10-01","11-15","12-15"],st:60,r:[28,44.5],o:"Spanien, Türkei, Israel",so:"Mollar de Elche, Wonderful, Hicaz",t:"Die Kerne lösen sich am leichtesten unter Wasser aus der Frucht."},
+ {id:"olive",n:"Olive",k:"sued",ref:40,s:.3,h:["10-01","10-20","12-15","01-31"],r:[28,44.5],o:"Mittelmeerraum",so:"Kalamata, Taggiasca, Manzanilla, Leccino",t:"Frisch vom Baum ungenießbar bitter. Erst das Einlegen in Lake macht Oliven essbar."},
+ {id:"kiwi",n:"Kiwi",k:"sued",ref:40,s:.5,h:["10-20","11-01","11-30","12-10"],st:150,r:[33,47.5],o:"Italien, Griechenland, Neuseeland",so:"Hayward, Soreli, Zespri Gold",t:"Hart geerntet und lange lagerfähig. Neben Äpfeln gelagert reift sie schneller."},
+ {id:"melone",n:"Zuckermelone",k:"sued",oref:40,h:["07-25","08-05","08-31","09-15"],r:[25,52],o:"Spanien, Italien",so:"Cantaloupe, Charentais, Galia, Honigmelone",t:"Eine reife Melone duftet am Stielansatz süß."},
+ {id:"kaktusfeige",n:"Kaktusfeige",k:"sued",ref:37,h:["08-01","08-15","09-30","10-31"],r:[24,40],o:"Sizilien, Spanien, Nordafrika",so:"Sanguigna, Sulfarina, Muscaredda",t:"Vorsicht, feine Stacheln. Mit Handschuhen schälen."},
+ {id:"wollmispel",n:"Japanische Wollmispel",k:"sued",ref:38,h:["04-15","05-01","05-31","06-15"],r:[26,42],o:"Spanien, Italien",so:"Algerie, Tanaka",t:"Frühe Frucht des Mittelmeerraums, in Italien Nespola, in Spanien Níspero genannt."},
+ {id:"mango",n:"Mango",k:"tropen",ref:20,h:["03-15","04-15","07-15","08-31"],r:[0,32],o:"Indien, Mexiko, Peru, Westafrika",so:"Alphonso, Kent, Keitt, Tommy Atkins",t:"Die Erntezeit unterscheidet sich je nach Anbauland und Sorte stark."},
+ {id:"banane",n:"Banane",k:"tropen",y:true,r:[0,30],o:"Ecuador, Kolumbien, Kanaren",so:"Cavendish, Plátano de Canarias, Babybanane",t:"Wird grün geerntet und reift nach. In den Tropen das ganze Jahr verfügbar."},
+ {id:"ananas",n:"Ananas",k:"tropen",y:true,pk:["03-01","06-30"],r:[0,26],o:"Costa Rica, Ghana",so:"MD2 (Extra Sweet), Queen Victoria",t:"Reift nach der Ernte kaum nach. Reif riecht sie süß am Stielansatz."},
+ {id:"papaya",n:"Papaya",k:"tropen",y:true,r:[0,27],o:"Brasilien, Mexiko",so:"Formosa, Solo",t:"In den Tropen ganzjährig. Die Kerne sind essbar und schmecken pfeffrig."},
+ {id:"avocado",n:"Avocado",k:"tropen",ref:36,s:0,h:["11-01","12-01","04-30","05-31"],r:[10,40],o:"Spanien, Peru, Mexiko",so:"Hass, Fuerte, Bacon",t:"Hass reift im Winter und Frühjahr. Nach der Ernte bei Zimmertemperatur nachreifen lassen."},
+ {id:"passion",n:"Passionsfrucht",k:"tropen",y:true,r:[0,30],o:"Kolumbien, Kenia",so:"Maracuja (gelb), Purpurgranadilla",t:"Reif, wenn die Schale schrumpelig wird."},
+ {id:"litschi",n:"Litschi",k:"tropen",ref:22,h:["05-15","06-01","07-15","07-31"],r:[17,28],o:"China, Thailand, Madagaskar",so:"Mauritius, Feizixiao",t:"Kurze Saison im Frühsommer. Die Schale lässt sich leicht abziehen."},
+ {id:"dattel",n:"Dattel",k:"tropen",ref:28,s:.5,h:["08-15","09-15","11-15","12-15"],st:180,r:[20,34],o:"Tunesien, Israel, Ägypten",so:"Deglet Nour, Medjool",t:"Frisch im Herbst, getrocknet das ganze Jahr."}
 ];
 
 /* Verwendung je Obstart */
@@ -506,62 +504,62 @@ const useText=id=>{const u=USE[id]||FRUITS.find(f=>f.id===id)?.u||[];return u.le
 
 /* ---------- Gemüse-Datenbank (gleiches Format, gh = Gewächshaus/Folie, u = Verwendung) ---------- */
 const VEG=[
- {id:"blumenkohl",n:"Blumenkohl",k:"kohl",c:"#E2DBBC",gh:["04-10","05-10"],fr:1,h:["05-10","06-01","10-31","12-10"],r:[30,62],so:"Clapton, Neckarperle, Graffiti (violett), Romanesco",u:["gekocht","gratiniert","Suppe","Rohkost"],t:"Die Blätter schützen die Blume vor Sonne. Kühl gelagert hält er einige Tage."},
- {id:"brokkoli",n:"Brokkoli",k:"kohl",c:"#3E7A3C",fr:1,h:["06-01","06-15","10-15","12-10"],r:[30,62],so:"Marathon, Belstar, Calabrese",u:["gedünstet","Pfanne","Suppe","Salat"],t:"Die geschälten Stiele sind zart und lecker. Schnell verbrauchen, er vergilbt rasch."},
- {id:"weisskohl",n:"Weißkohl",k:"kohl",c:"#C9DDA7",fr:1,h:["06-01","08-15","11-15","12-10"],st:180,r:[34,66],so:"Filderkraut, Dithmarscher Frühkohl, Ruhm von Enkhuizen",u:["Krautsalat","Sauerkraut","Eintopf","Kohlrouladen"],t:"Lagert kühl über Monate. Für Sauerkraut wird er fein gehobelt und mit Salz vergoren."},
- {id:"rotkohl",n:"Rotkohl",k:"kohl",c:"#7B2D5E",fr:1,h:["05-15","09-15","11-30","12-15"],st:100,r:[34,66],so:"Roodkop, Rodynda, Marner Lagerrot",u:["Rotkraut","Salat","geschmort"],t:"Ein Schuss Essig oder ein Apfel hält die Farbe rotviolett, sonst wird er bläulich."},
- {id:"wirsing",n:"Wirsing",k:"kohl",c:"#8FB466",h:["07-01","08-01","12-31","02-28"],r:[34,62],so:"Vertus, Smaragd, Winterfürst",u:["Eintopf","Rouladen","Rahmwirsing","Pasta"],t:"Winterwirsing verträgt Frost und bleibt bis ins Frühjahr auf dem Feld."},
- {id:"gruenkohl",n:"Grünkohl",k:"kohl",c:"#3F6B3A",h:["10-01","11-01","12-31","03-15"],r:[42,60],so:"Lerchenzungen, Halbhoher grüner krauser, Nero di Toscana",u:["Grünkohl mit Pinkel","Eintopf","Chips","Smoothies"],t:"Frost wandelt Stärke in Zucker um. Deshalb schmeckt Grünkohl nach den ersten Frostnächten milder."},
- {id:"rosenkohl",n:"Rosenkohl",k:"kohl",c:"#6E9A48",h:["09-15","10-01","12-31","03-15"],r:[42,60],so:"Hilds Ideal, Groninger, Falstaff (rot)",u:["gedünstet","geröstet","Gratin"],t:"Wird am Strunk von unten nach oben geerntet. Nach Frost aromatischer."},
- {id:"kohlrabi",n:"Kohlrabi",k:"kohl",c:"#B9D58A",fr:1,gh:["04-01","05-10"],h:["05-01","05-10","10-31","12-10"],r:[34,64],so:"Lanro, Blaro (blau), Superschmelz",u:["roh","gedünstet","in Rahm","Suppe"],t:"Die zarten Herzblätter kann man mitkochen. Frühe Ware stammt aus Gewächshaus und Folientunnel."},
- {id:"chinakohl",n:"Chinakohl",k:"kohl",c:"#DCE8B0",fr:1,h:["05-20","06-01","10-31","11-30"],st:120,r:[34,62],so:"Granat, Bilko",u:["Salat","Wok","Kimchi"],t:"Mild und zart. Gekühlt lagert er einige Wochen."},
- {id:"spitzkohl",n:"Spitzkohl",k:"kohl",c:"#A9C97A",fr:1,h:["05-15","06-01","10-31","11-20"],r:[34,62],so:"Filderkraut, Caraflex, Express",u:["Pfanne","Salat","geschmort"],t:"Zarter und milder als Weißkohl. Braucht nur kurze Garzeit."},
- {id:"pakchoi",n:"Pak Choi",k:"kohl",c:"#7DAE5A",fr:1,h:["04-20","09-01","11-15","11-30"],r:[30,62],so:"Pak Choi, Tatsoi, Senfkohl",t:"Stiele garen langsamer als die Blätter. Deshalb die Stiele zuerst in die Pfanne geben.",u:["kurz gebraten im Wok","gedünstet als Beilage","in Suppen und Ramen","jung roh im Salat"]},
- {id:"kartoffel",n:"Kartoffel",k:"wurzel",c:"#C9A866",h:["06-01","08-15","10-15","10-31"],st:220,r:[10,68],so:"Annabelle, Linda, Belana, Sieglinde, Adretta, Bintje",u:["Pellkartoffeln","Bratkartoffeln","Püree","Salat","Pommes"],t:"Frühkartoffeln haben eine dünne Schale und lagern nicht. Lagerkartoffeln dunkel und kühl aufbewahren, sonst werden sie grün."},
- {id:"moehre",n:"Möhre",k:"wurzel",c:"#E87A2A",fr:1,h:["06-01","08-01","10-31","11-30"],st:180,r:[20,68],so:"Nantaise, Rodelika, Bolero, Pariser Markt",u:["roh","Rohkost","Suppe","Kuchen","Saft"],t:"Lagert in feuchtem Sand oder im Kühlschrank lange. Das Grün vorher abdrehen."},
- {id:"rotebete",n:"Rote Bete",k:"wurzel",c:"#8E1E3C",fr:1,h:["06-15","08-15","10-31","11-15"],st:180,r:[30,66],so:"Rote Kugel, Chioggia, Burpees Golden",u:["Salat","Ofengemüse","Borschtsch","Saft"],t:"Mit Handschuhen schälen, sie färbt stark. Roh geraspelt schmeckt sie erdig-süß."},
- {id:"pastinake",n:"Pastinake",k:"wurzel",c:"#E9DDB6",h:["10-01","10-10","12-31","03-31"],r:[38,62],so:"Halblange Weiße, Gladiator",u:["Püree","Suppe","Ofengemüse","Chips"],t:"Nach Frost süßer. Sie kann den Winter über im Boden bleiben."},
- {id:"petersilienwurzel",n:"Petersilienwurzel",k:"wurzel",c:"#EEE3C2",h:["09-25","10-05","12-31","03-15"],r:[38,62],so:"Berliner Halblange, Arat",u:["Suppe","Püree","Brühe"],t:"Würziger als Pastinake und ein klassischer Teil des Suppengrüns."},
- {id:"sellerie",n:"Knollensellerie",k:"wurzel",c:"#D8D2A6",fr:1,h:["07-15","09-01","10-31","11-30"],st:200,r:[34,62],so:"Prinz, Monarch, Mars",u:["Suppe","Sellerieschnitzel","Püree","Salat"],t:"Teil des Suppengrüns. In Scheiben paniert wird er zum Sellerieschnitzel."},
- {id:"schwarzwurzel",n:"Schwarzwurzel",k:"wurzel",c:"#3A2E25",h:["09-15","10-15","01-31","04-15"],r:[40,58],so:"Hoffmanns Schwarze Pfahl, Duplex",u:["gekocht","Rahmgemüse","Suppe"],t:"Beim Schälen tritt klebriger Milchsaft aus. Handschuhe tragen und die Stangen in Essigwasser legen."},
- {id:"radieschen",n:"Radieschen",k:"wurzel",c:"#D8344F",gh:["03-01","04-10"],h:["04-01","04-15","06-30","11-10"],r:[25,68],so:"Saxa, Riesenbutter, Eiszapfen",u:["roh","aufs Brot","Salat"],t:"Ohne Blätter lagern, sonst werden sie schnell weich."},
- {id:"rettich",n:"Rettich",k:"wurzel",c:"#EDEAE0",fr:1,h:["05-01","05-15","10-15","11-15"],st:150,r:[30,64],so:"Münchner Bier, Neckarruhm, Daikon",u:["roh","Radi zur Brotzeit","Salat"],t:"Der bayerische Radi wird spiralig geschnitten, gesalzen und zur Brotzeit gegessen."},
- {id:"topinambur",n:"Topinambur",k:"wurzel",c:"#B88B5A",h:["10-15","11-01","02-28","03-31"],r:[36,62],so:"Bianca, Rote Zonenkugel",u:["roh","Suppe","Ofengemüse","Chips"],t:"Schmeckt leicht nussig. Wird schnell weich, also bald verbrauchen."},
- {id:"steckruebe",n:"Steckrübe",k:"wurzel",c:"#D9B35A",h:["09-15","10-15","12-31","01-31"],st:60,r:[40,66],so:"Wilhelmsburger, Gelbe Schmalz",u:["Eintopf","Püree","Ofengemüse"],t:"Früher Notnahrung, heute wieder beliebt. Lagert kühl mehrere Monate."},
- {id:"suesskartoffel",n:"Süßkartoffel",k:"wurzel",c:"#D06A2E",ref:40,h:["08-15","09-01","10-15","10-31"],st:150,r:[5,50],o:"Spanien, Portugal, USA",so:"Beauregard, Murasaki, Covington",u:["Ofen","Pommes","Püree","Curry"],t:"Nicht im Kühlschrank lagern, Kälte schadet ihr."},
- {id:"meerrettich",n:"Meerrettich",k:"wurzel",c:"#E6DFC9",h:["10-01","10-15","12-31","02-28"],r:[40,60],so:"Spreewälder, Bayerischer Meerrettich",u:["frisch gerieben","zu Fisch und Fleisch","Soßen"],t:"Erst kurz vor dem Servieren reiben, das Aroma verfliegt schnell."},
- {id:"zwiebel",n:"Zwiebel",k:"zwiebel",c:"#C79A4A",h:["06-15","08-01","09-15","09-30"],st:240,r:[25,66],so:"Stuttgarter Riesen, Sturon, Rote Baron",u:["Grundlage vieler Gerichte","Zwiebelkuchen","Röstzwiebeln"],t:"Trocken, dunkel und luftig gelagert halten Zwiebeln bis ins Frühjahr."},
- {id:"fruehlingszwiebel",n:"Frühlingszwiebel",k:"zwiebel",c:"#8DC06A",h:["04-15","05-01","09-30","10-31"],r:[15,66],so:"Ishikura, White Lisbon",u:["roh","Salat","Wok"],t:"Die weiße Knolle und das Grün sind beide essbar."},
- {id:"lauch",n:"Lauch (Porree)",k:"zwiebel",c:"#6E9E5C",h:["06-10","07-15","12-31","05-31"],r:[34,62],so:"Blaugrüner Winter, Hannibal, Bandit",u:["Suppe","Quiche","Gemüse","Gratin"],t:"Zwischen den Blättern sitzt oft Erde. Längs einschneiden und gründlich waschen."},
- {id:"knoblauch",n:"Knoblauch",k:"zwiebel",c:"#E2DCCB",h:["06-15","07-01","07-31","08-20"],st:240,r:[25,62],so:"Thermidrome, Germidour, Printanor",u:["Würzen","Aioli","Confit"],t:"Junger Knoblauch im Frühsommer ist mild und saftig. Getrocknet lagert er monatelang."},
- {id:"baerlauch",n:"Bärlauch",k:"zwiebel",c:"#4F8A3A",h:["03-01","03-20","04-30","05-15"],r:[42,60],so:"Wildsammlung, Gartenkultur",u:["Pesto","Suppe","Kräuterbutter","Quark"],t:"Verwechslungsgefahr mit giftigem Maiglöckchen und Herbstzeitlose. Echter Bärlauch riecht beim Zerreiben nach Knoblauch."},
- {id:"schalotte",n:"Schalotte",k:"zwiebel",c:"#B06A5A",h:["07-15","08-01","08-31","09-15"],st:180,r:[25,62],so:"Longor, Jermor, Échalion",u:["Soßen","Vinaigrette","geschmort"],t:"Milder und feiner als Zwiebeln, ideal für Soßen."},
- {id:"kopfsalat",n:"Kopfsalat",k:"blatt",c:"#9FCB6A",gh:["02-15","04-20"],h:["04-20","05-01","10-15","11-15"],r:[25,66],so:"Maikönig, Attraction, Lollo Rosso, Eichblatt",u:["Salat"],t:"Frühe Ware wächst unter Glas oder Folie. Erst kurz vor dem Essen anmachen."},
- {id:"eisberg",n:"Eisbergsalat",k:"blatt",c:"#C8E3A0",h:["05-15","06-01","09-30","11-10"],r:[30,64],so:"Saladin, Fortunas",u:["Salat","Burger","Wraps"],t:"Knackig und im Kühlschrank über eine Woche haltbar."},
- {id:"pfluecksalat",n:"Pflücksalat (Lollo, Eichblatt)",k:"blatt",c:"#A8436A",gh:["03-01","04-15"],h:["04-15","05-01","10-15","11-15"],r:[25,66],so:"Lollo Rosso, Lollo Bionda, Eichblattsalat, Batavia",t:"Lose Salate welken schnell. In ein feuchtes Tuch gewickelt bleiben sie im Gemüsefach zwei bis drei Tage frisch.",u:["als Blattsalat","auf Burgern und Sandwiches","als Unterlage für Vorspeisen"]},
- {id:"feldsalat",n:"Feldsalat",k:"blatt",c:"#4E8C3E",pk:["09-20","01-31"],y:true,h:["09-01","10-01","01-31","05-31"],r:[34,60],so:"Vit, Gala, Dunkelgrüner Vollherziger",u:["Salat mit Speck","mit Nüssen","mit Kartoffeldressing"],t:"Winterhart und der typische Wintersalat. Gründlich waschen, die Rosetten sind oft sandig."},
- {id:"spinat",n:"Spinat",k:"blatt",c:"#2F6B35",h:["03-20","04-01","10-15","12-15"],r:[25,66],so:"Matador, Butterflay, Wurzelspinat",u:["roh als Salat","Rahmspinat","Lasagne","Smoothies"],t:"Frühjahrs- und Herbstspinat sind am zartesten. Gekochten Spinat nicht lange warm halten."},
- {id:"mangold",n:"Mangold",k:"blatt",c:"#7FA850",gh:["03-01","04-30"],h:["05-01","06-01","09-30","11-15"],r:[25,64],so:"Lucullus, Bright Lights, Glatter Silber",u:["wie Spinat","Stiele gedünstet","Quiche"],t:"Die Stiele etwas länger garen als die Blätter."},
- {id:"rucola",n:"Rucola",k:"blatt",c:"#5A8A3A",gh:["03-01","04-30"],h:["05-01","05-20","10-31","11-15"],r:[25,64],so:"Rucola coltivata, Wilde Rauke",u:["Salat","auf Pizza","Pesto"],t:"Im Sommer schärfer, junge Blätter sind milder."},
- {id:"endivie",n:"Endivie",k:"blatt",c:"#B5D07A",fr:1,h:["05-15","09-01","11-15","11-30"],r:[34,58],so:"Escariol, Frisée",u:["Salat","Endiviensalat mit Kartoffeln"],t:"Leicht bitter. Lauwarmes Wasser mildert die Bitterstoffe."},
- {id:"chicoree",n:"Chicorée",k:"blatt",c:"#F3EEC7",pk:["10-01","06-15"],y:true,h:["09-15","10-15","05-31","06-30"],r:[38,58],so:"Zoom, Totem",u:["Salat","gratiniert","Schiffchen mit Füllung"],t:"Wächst im Dunkeln aus eingelagerten Wurzeln. Den bitteren Strunk keilförmig herausschneiden."},
- {id:"radicchio",n:"Radicchio",k:"blatt",c:"#9E2343",fr:1,h:["05-20","06-15","10-31","11-30"],r:[34,56],so:"Chioggia, Treviso, Castelfranco",u:["Salat","Risotto","gegrillt"],t:"Hitze mildert die Bitterkeit, etwa gegrillt oder im Risotto."},
- {id:"zuckerhut",n:"Zuckerhut",k:"blatt",c:"#D9DE9C",fr:1,h:["10-01","10-15","12-15","12-31"],st:60,r:[34,58],so:"Zuckerhut, Fiero (roter Zuckerhut)",t:"Leicht bitter wie Chicorée. Kurz in lauwarmes Wasser gelegt verliert er etwas Bitterkeit.",u:["als Wintersalat mit Orangen oder Äpfeln","in feinen Streifen im gemischten Salat","kurz gedünstet als Gemüse"]},
- {id:"tomate",n:"Tomate",k:"frucht",c:"#D8352A",gh:["03-15","12-15"],h:["07-01","07-20","09-15","10-15"],r:[15,60],so:"Harzfeuer, Ochsenherz, San Marzano, Cocktailtomaten",u:["roh","Salat","Soße","Suppe","Ofen"],t:"Nicht im Kühlschrank lagern, dort verliert sie Aroma. Freilandtomaten haben ab Juli Saison."},
- {id:"gurke",n:"Gurke",k:"frucht",c:"#3E8E4E",gh:["03-15","10-31"],h:["06-20","07-10","08-31","09-30"],r:[15,60],so:"Salatgurke Dominica, Einlegegurke Vorgebirgstrauben, Snackgurke",u:["Salat","Tzatziki","roh","eingelegt"],t:"Regionale Gurken kommen von April bis Oktober aus Gewächshäusern, im Hochsommer auch vom Feld."},
- {id:"zucchini",n:"Zucchini",k:"frucht",c:"#5A8F3C",h:["05-20","06-10","09-30","10-15"],r:[15,60],so:"Black Beauty, Gold Rush, Defender",u:["Pfanne","Ofen","gefüllt","Puffer"],t:"Jung geerntet am zartesten. Bitter schmeckende Zucchini nicht essen."},
- {id:"paprika",n:"Paprika",k:"frucht",c:"#E23B2A",fx:49,gh:["04-01","11-15"],h:["08-01","08-15","09-30","10-15"],r:[15,60],so:"Mavras, Pusztagold, Spitzpaprika",u:["roh","gefüllt","Ofen","Ajvar"],t:"Grüne Paprika ist unreif geerntet, rote und gelbe sind ausgereift und süßer."},
- {id:"aubergine",n:"Aubergine",k:"frucht",c:"#4A2A5A",fx:48,gh:["06-01","10-31"],h:["08-01","08-15","09-15","09-30"],r:[10,58],so:"Black Beauty, Rosa Bianca, Listada de Gandia",u:["Ofen","Moussaka","gegrillt","Baba Ghanoush"],t:"Roh nicht genießbar. Vor dem Braten salzen, das zieht Wasser."},
- {id:"kuerbis",n:"Kürbis",k:"frucht",c:"#E87422",h:["07-20","08-20","10-31","11-15"],st:75,r:[15,62],so:"Hokkaido, Butternut, Muskatkürbis, Spaghettikürbis",u:["Suppe","Ofen","Curry","Kuchen"],t:"Hokkaido kann man mit Schale essen. Ganze Kürbisse lagern kühl und trocken monatelang."},
- {id:"mais",n:"Zuckermais",k:"frucht",c:"#F2C93A",h:["07-20","08-01","09-30","10-20"],r:[10,56],so:"Golden Bantam, Damaun, Mirai",u:["gegrillt","gekocht","Salat"],t:"Nach der Ernte wird Zucker schnell zu Stärke. Frisch ist Mais am süßesten."},
- {id:"bohne",n:"Grüne Bohne",k:"huelse",c:"#4F8B3B",h:["06-15","07-01","09-30","10-20"],r:[10,62],so:"Buschbohne Saxa, Stangenbohne Blauhilde, Neckarkönigin",u:["Bohnensalat","Gemüse","Eintopf"],t:"Roh giftig durch Phasin. Immer mindestens zehn Minuten kochen."},
- {id:"erbse",n:"Erbse & Zuckerschote",k:"huelse",c:"#7DB548",h:["06-01","06-10","07-31","08-31"],r:[25,64],so:"Kleine Rheinländerin, Zuckerschote Norli, Kelvedon Wonder",u:["frisch roh","Gemüse","Suppe","Risotto"],t:"Frisch aus der Schote schmecken Erbsen süß. Zuckerschoten isst man mit Hülse."},
- {id:"dickebohne",n:"Dicke Bohne",k:"huelse",c:"#9BB86A",h:["06-15","06-25","07-20","07-31"],r:[30,62],so:"Hangdown, Dreifach Weiße",u:["Eintopf","Püree","mit Speck"],t:"Die Kerne nach dem Blanchieren aus der zähen Haut drücken."},
- {id:"spargel",n:"Spargel",k:"spross",c:"#EDE4C2",s:.5,h:["04-10","04-25","06-15","06-24"],r:[34,58],so:"Ravel, Gijnlim, Backlim, Grünspargel Grolim",u:["gekocht mit Hollandaise","Suppe","Ofen","grün in der Pfanne"],t:"Die Saison endet traditionell am Johannistag (24. Juni), damit sich die Pflanzen erholen."},
- {id:"rhabarber",n:"Rhabarber",k:"spross",c:"#C8395A",gh:["03-01","04-05"],s:.5,h:["04-01","04-10","05-31","06-24"],r:[38,64],so:"Holsteiner Blut, Frambozen Rood, Elmsfeuer",u:["Kompott","Kuchen","Marmelade","Schorle"],t:"Nur die Stiele essen, die Blätter enthalten viel Oxalsäure. Geerntet wird bis zum Johannistag."},
- {id:"fenchel",n:"Fenchel",k:"spross",c:"#CFE0A2",fr:1,h:["06-01","06-15","10-31","12-10"],r:[25,58],so:"Finale, Orion, Rondo",u:["roh als Salat","Ofen","geschmort"],t:"Das Fenchelgrün ist ein feines Würzkraut."},
- {id:"staudensellerie",n:"Staudensellerie",k:"spross",c:"#A9C979",fr:1,h:["05-20","06-15","10-31","12-10"],r:[25,60],so:"Tango, Golden Spartan",u:["roh mit Dip","Suppe","Soffritto"],t:"Die Fasern an der Außenseite mit dem Sparschäler abziehen."},
- {id:"artischocke",n:"Artischocke",k:"spross",c:"#6F8A5C",oref:40,ch:["11-01","02-15","04-30","05-31"],h:["07-01","07-20","09-15","10-15"],r:[28,52],o:"Italien, Spanien, Frankreich",so:"Romanesco, Violetto, Camus de Bretagne",u:["gekocht mit Dip","Artischockenböden","eingelegt"],t:"Die Blätter einzeln abzupfen und den fleischigen Teil in einen Dip tauchen."}
+ {id:"blumenkohl",n:"Blumenkohl",k:"kohl",gh:["04-10","05-10"],fr:1,h:["05-10","06-01","10-31","12-10"],r:[30,62],so:"Clapton, Neckarperle, Graffiti (violett), Romanesco",u:["gekocht","gratiniert","Suppe","Rohkost"],t:"Die Blätter schützen die Blume vor Sonne. Kühl gelagert hält er einige Tage."},
+ {id:"brokkoli",n:"Brokkoli",k:"kohl",fr:1,h:["06-01","06-15","10-15","12-10"],r:[30,62],so:"Marathon, Belstar, Calabrese",u:["gedünstet","Pfanne","Suppe","Salat"],t:"Die geschälten Stiele sind zart und lecker. Schnell verbrauchen, er vergilbt rasch."},
+ {id:"weisskohl",n:"Weißkohl",k:"kohl",fr:1,h:["06-01","08-15","11-15","12-10"],st:180,r:[34,66],so:"Filderkraut, Dithmarscher Frühkohl, Ruhm von Enkhuizen",u:["Krautsalat","Sauerkraut","Eintopf","Kohlrouladen"],t:"Lagert kühl über Monate. Für Sauerkraut wird er fein gehobelt und mit Salz vergoren."},
+ {id:"rotkohl",n:"Rotkohl",k:"kohl",fr:1,h:["05-15","09-15","11-30","12-15"],st:100,r:[34,66],so:"Roodkop, Rodynda, Marner Lagerrot",u:["Rotkraut","Salat","geschmort"],t:"Ein Schuss Essig oder ein Apfel hält die Farbe rotviolett, sonst wird er bläulich."},
+ {id:"wirsing",n:"Wirsing",k:"kohl",h:["07-01","08-01","12-31","02-28"],r:[34,62],so:"Vertus, Smaragd, Winterfürst",u:["Eintopf","Rouladen","Rahmwirsing","Pasta"],t:"Winterwirsing verträgt Frost und bleibt bis ins Frühjahr auf dem Feld."},
+ {id:"gruenkohl",n:"Grünkohl",k:"kohl",h:["10-01","11-01","12-31","03-15"],r:[42,60],so:"Lerchenzungen, Halbhoher grüner krauser, Nero di Toscana",u:["Grünkohl mit Pinkel","Eintopf","Chips","Smoothies"],t:"Frost wandelt Stärke in Zucker um. Deshalb schmeckt Grünkohl nach den ersten Frostnächten milder."},
+ {id:"rosenkohl",n:"Rosenkohl",k:"kohl",h:["09-15","10-01","12-31","03-15"],r:[42,60],so:"Hilds Ideal, Groninger, Falstaff (rot)",u:["gedünstet","geröstet","Gratin"],t:"Wird am Strunk von unten nach oben geerntet. Nach Frost aromatischer."},
+ {id:"kohlrabi",n:"Kohlrabi",k:"kohl",fr:1,gh:["04-01","05-10"],h:["05-01","05-10","10-31","12-10"],r:[34,64],so:"Lanro, Blaro (blau), Superschmelz",u:["roh","gedünstet","in Rahm","Suppe"],t:"Die zarten Herzblätter kann man mitkochen. Frühe Ware stammt aus Gewächshaus und Folientunnel."},
+ {id:"chinakohl",n:"Chinakohl",k:"kohl",fr:1,h:["05-20","06-01","10-31","11-30"],st:120,r:[34,62],so:"Granat, Bilko",u:["Salat","Wok","Kimchi"],t:"Mild und zart. Gekühlt lagert er einige Wochen."},
+ {id:"spitzkohl",n:"Spitzkohl",k:"kohl",fr:1,h:["05-15","06-01","10-31","11-20"],r:[34,62],so:"Filderkraut, Caraflex, Express",u:["Pfanne","Salat","geschmort"],t:"Zarter und milder als Weißkohl. Braucht nur kurze Garzeit."},
+ {id:"pakchoi",n:"Pak Choi",k:"kohl",fr:1,h:["04-20","09-01","11-15","11-30"],r:[30,62],so:"Pak Choi, Tatsoi, Senfkohl",t:"Stiele garen langsamer als die Blätter. Deshalb die Stiele zuerst in die Pfanne geben.",u:["kurz gebraten im Wok","gedünstet als Beilage","in Suppen und Ramen","jung roh im Salat"]},
+ {id:"kartoffel",n:"Kartoffel",k:"wurzel",h:["06-01","08-15","10-15","10-31"],st:220,r:[10,68],so:"Annabelle, Linda, Belana, Sieglinde, Adretta, Bintje",u:["Pellkartoffeln","Bratkartoffeln","Püree","Salat","Pommes"],t:"Frühkartoffeln haben eine dünne Schale und lagern nicht. Lagerkartoffeln dunkel und kühl aufbewahren, sonst werden sie grün."},
+ {id:"moehre",n:"Möhre",k:"wurzel",fr:1,h:["06-01","08-01","10-31","11-30"],st:180,r:[20,68],so:"Nantaise, Rodelika, Bolero, Pariser Markt",u:["roh","Rohkost","Suppe","Kuchen","Saft"],t:"Lagert in feuchtem Sand oder im Kühlschrank lange. Das Grün vorher abdrehen."},
+ {id:"rotebete",n:"Rote Bete",k:"wurzel",fr:1,h:["06-15","08-15","10-31","11-15"],st:180,r:[30,66],so:"Rote Kugel, Chioggia, Burpees Golden",u:["Salat","Ofengemüse","Borschtsch","Saft"],t:"Mit Handschuhen schälen, sie färbt stark. Roh geraspelt schmeckt sie erdig-süß."},
+ {id:"pastinake",n:"Pastinake",k:"wurzel",h:["10-01","10-10","12-31","03-31"],r:[38,62],so:"Halblange Weiße, Gladiator",u:["Püree","Suppe","Ofengemüse","Chips"],t:"Nach Frost süßer. Sie kann den Winter über im Boden bleiben."},
+ {id:"petersilienwurzel",n:"Petersilienwurzel",k:"wurzel",h:["09-25","10-05","12-31","03-15"],r:[38,62],so:"Berliner Halblange, Arat",u:["Suppe","Püree","Brühe"],t:"Würziger als Pastinake und ein klassischer Teil des Suppengrüns."},
+ {id:"sellerie",n:"Knollensellerie",k:"wurzel",fr:1,h:["07-15","09-01","10-31","11-30"],st:200,r:[34,62],so:"Prinz, Monarch, Mars",u:["Suppe","Sellerieschnitzel","Püree","Salat"],t:"Teil des Suppengrüns. In Scheiben paniert wird er zum Sellerieschnitzel."},
+ {id:"schwarzwurzel",n:"Schwarzwurzel",k:"wurzel",h:["09-15","10-15","01-31","04-15"],r:[40,58],so:"Hoffmanns Schwarze Pfahl, Duplex",u:["gekocht","Rahmgemüse","Suppe"],t:"Beim Schälen tritt klebriger Milchsaft aus. Handschuhe tragen und die Stangen in Essigwasser legen."},
+ {id:"radieschen",n:"Radieschen",k:"wurzel",gh:["03-01","04-10"],h:["04-01","04-15","06-30","11-10"],r:[25,68],so:"Saxa, Riesenbutter, Eiszapfen",u:["roh","aufs Brot","Salat"],t:"Ohne Blätter lagern, sonst werden sie schnell weich."},
+ {id:"rettich",n:"Rettich",k:"wurzel",fr:1,h:["05-01","05-15","10-15","11-15"],st:150,r:[30,64],so:"Münchner Bier, Neckarruhm, Daikon",u:["roh","Radi zur Brotzeit","Salat"],t:"Der bayerische Radi wird spiralig geschnitten, gesalzen und zur Brotzeit gegessen."},
+ {id:"topinambur",n:"Topinambur",k:"wurzel",h:["10-15","11-01","02-28","03-31"],r:[36,62],so:"Bianca, Rote Zonenkugel",u:["roh","Suppe","Ofengemüse","Chips"],t:"Schmeckt leicht nussig. Wird schnell weich, also bald verbrauchen."},
+ {id:"steckruebe",n:"Steckrübe",k:"wurzel",h:["09-15","10-15","12-31","01-31"],st:60,r:[40,66],so:"Wilhelmsburger, Gelbe Schmalz",u:["Eintopf","Püree","Ofengemüse"],t:"Früher Notnahrung, heute wieder beliebt. Lagert kühl mehrere Monate."},
+ {id:"suesskartoffel",n:"Süßkartoffel",k:"wurzel",ref:40,h:["08-15","09-01","10-15","10-31"],st:150,r:[5,50],o:"Spanien, Portugal, USA",so:"Beauregard, Murasaki, Covington",u:["Ofen","Pommes","Püree","Curry"],t:"Nicht im Kühlschrank lagern, Kälte schadet ihr."},
+ {id:"meerrettich",n:"Meerrettich",k:"wurzel",h:["10-01","10-15","12-31","02-28"],r:[40,60],so:"Spreewälder, Bayerischer Meerrettich",u:["frisch gerieben","zu Fisch und Fleisch","Soßen"],t:"Erst kurz vor dem Servieren reiben, das Aroma verfliegt schnell."},
+ {id:"zwiebel",n:"Zwiebel",k:"zwiebel",h:["06-15","08-01","09-15","09-30"],st:240,r:[25,66],so:"Stuttgarter Riesen, Sturon, Rote Baron",u:["Grundlage vieler Gerichte","Zwiebelkuchen","Röstzwiebeln"],t:"Trocken, dunkel und luftig gelagert halten Zwiebeln bis ins Frühjahr."},
+ {id:"fruehlingszwiebel",n:"Frühlingszwiebel",k:"zwiebel",h:["04-15","05-01","09-30","10-31"],r:[15,66],so:"Ishikura, White Lisbon",u:["roh","Salat","Wok"],t:"Die weiße Knolle und das Grün sind beide essbar."},
+ {id:"lauch",n:"Lauch (Porree)",k:"zwiebel",h:["06-10","07-15","12-31","05-31"],r:[34,62],so:"Blaugrüner Winter, Hannibal, Bandit",u:["Suppe","Quiche","Gemüse","Gratin"],t:"Zwischen den Blättern sitzt oft Erde. Längs einschneiden und gründlich waschen."},
+ {id:"knoblauch",n:"Knoblauch",k:"zwiebel",h:["06-15","07-01","07-31","08-20"],st:240,r:[25,62],so:"Thermidrome, Germidour, Printanor",u:["Würzen","Aioli","Confit"],t:"Junger Knoblauch im Frühsommer ist mild und saftig. Getrocknet lagert er monatelang."},
+ {id:"baerlauch",n:"Bärlauch",k:"zwiebel",h:["03-01","03-20","04-30","05-15"],r:[42,60],so:"Wildsammlung, Gartenkultur",u:["Pesto","Suppe","Kräuterbutter","Quark"],t:"Verwechslungsgefahr mit giftigem Maiglöckchen und Herbstzeitlose. Echter Bärlauch riecht beim Zerreiben nach Knoblauch."},
+ {id:"schalotte",n:"Schalotte",k:"zwiebel",h:["07-15","08-01","08-31","09-15"],st:180,r:[25,62],so:"Longor, Jermor, Échalion",u:["Soßen","Vinaigrette","geschmort"],t:"Milder und feiner als Zwiebeln, ideal für Soßen."},
+ {id:"kopfsalat",n:"Kopfsalat",k:"blatt",gh:["02-15","04-20"],h:["04-20","05-01","10-15","11-15"],r:[25,66],so:"Maikönig, Attraction, Lollo Rosso, Eichblatt",u:["Salat"],t:"Frühe Ware wächst unter Glas oder Folie. Erst kurz vor dem Essen anmachen."},
+ {id:"eisberg",n:"Eisbergsalat",k:"blatt",h:["05-15","06-01","09-30","11-10"],r:[30,64],so:"Saladin, Fortunas",u:["Salat","Burger","Wraps"],t:"Knackig und im Kühlschrank über eine Woche haltbar."},
+ {id:"pfluecksalat",n:"Pflücksalat (Lollo, Eichblatt)",k:"blatt",gh:["03-01","04-15"],h:["04-15","05-01","10-15","11-15"],r:[25,66],so:"Lollo Rosso, Lollo Bionda, Eichblattsalat, Batavia",t:"Lose Salate welken schnell. In ein feuchtes Tuch gewickelt bleiben sie im Gemüsefach zwei bis drei Tage frisch.",u:["als Blattsalat","auf Burgern und Sandwiches","als Unterlage für Vorspeisen"]},
+ {id:"feldsalat",n:"Feldsalat",k:"blatt",pk:["09-20","01-31"],y:true,h:["09-01","10-01","01-31","05-31"],r:[34,60],so:"Vit, Gala, Dunkelgrüner Vollherziger",u:["Salat mit Speck","mit Nüssen","mit Kartoffeldressing"],t:"Winterhart und der typische Wintersalat. Gründlich waschen, die Rosetten sind oft sandig."},
+ {id:"spinat",n:"Spinat",k:"blatt",h:["03-20","04-01","10-15","12-15"],r:[25,66],so:"Matador, Butterflay, Wurzelspinat",u:["roh als Salat","Rahmspinat","Lasagne","Smoothies"],t:"Frühjahrs- und Herbstspinat sind am zartesten. Gekochten Spinat nicht lange warm halten."},
+ {id:"mangold",n:"Mangold",k:"blatt",gh:["03-01","04-30"],h:["05-01","06-01","09-30","11-15"],r:[25,64],so:"Lucullus, Bright Lights, Glatter Silber",u:["wie Spinat","Stiele gedünstet","Quiche"],t:"Die Stiele etwas länger garen als die Blätter."},
+ {id:"rucola",n:"Rucola",k:"blatt",gh:["03-01","04-30"],h:["05-01","05-20","10-31","11-15"],r:[25,64],so:"Rucola coltivata, Wilde Rauke",u:["Salat","auf Pizza","Pesto"],t:"Im Sommer schärfer, junge Blätter sind milder."},
+ {id:"endivie",n:"Endivie",k:"blatt",fr:1,h:["05-15","09-01","11-15","11-30"],r:[34,58],so:"Escariol, Frisée",u:["Salat","Endiviensalat mit Kartoffeln"],t:"Leicht bitter. Lauwarmes Wasser mildert die Bitterstoffe."},
+ {id:"chicoree",n:"Chicorée",k:"blatt",pk:["10-01","06-15"],y:true,h:["09-15","10-15","05-31","06-30"],r:[38,58],so:"Zoom, Totem",u:["Salat","gratiniert","Schiffchen mit Füllung"],t:"Wächst im Dunkeln aus eingelagerten Wurzeln. Den bitteren Strunk keilförmig herausschneiden."},
+ {id:"radicchio",n:"Radicchio",k:"blatt",fr:1,h:["05-20","06-15","10-31","11-30"],r:[34,56],so:"Chioggia, Treviso, Castelfranco",u:["Salat","Risotto","gegrillt"],t:"Hitze mildert die Bitterkeit, etwa gegrillt oder im Risotto."},
+ {id:"zuckerhut",n:"Zuckerhut",k:"blatt",fr:1,h:["10-01","10-15","12-15","12-31"],st:60,r:[34,58],so:"Zuckerhut, Fiero (roter Zuckerhut)",t:"Leicht bitter wie Chicorée. Kurz in lauwarmes Wasser gelegt verliert er etwas Bitterkeit.",u:["als Wintersalat mit Orangen oder Äpfeln","in feinen Streifen im gemischten Salat","kurz gedünstet als Gemüse"]},
+ {id:"tomate",n:"Tomate",k:"frucht",gh:["03-15","12-15"],h:["07-01","07-20","09-15","10-15"],r:[15,60],so:"Harzfeuer, Ochsenherz, San Marzano, Cocktailtomaten",u:["roh","Salat","Soße","Suppe","Ofen"],t:"Nicht im Kühlschrank lagern, dort verliert sie Aroma. Freilandtomaten haben ab Juli Saison."},
+ {id:"gurke",n:"Gurke",k:"frucht",gh:["03-15","10-31"],h:["06-20","07-10","08-31","09-30"],r:[15,60],so:"Salatgurke Dominica, Einlegegurke Vorgebirgstrauben, Snackgurke",u:["Salat","Tzatziki","roh","eingelegt"],t:"Regionale Gurken kommen von April bis Oktober aus Gewächshäusern, im Hochsommer auch vom Feld."},
+ {id:"zucchini",n:"Zucchini",k:"frucht",h:["05-20","06-10","09-30","10-15"],r:[15,60],so:"Black Beauty, Gold Rush, Defender",u:["Pfanne","Ofen","gefüllt","Puffer"],t:"Jung geerntet am zartesten. Bitter schmeckende Zucchini nicht essen."},
+ {id:"paprika",n:"Paprika",k:"frucht",fx:49,gh:["04-01","11-15"],h:["08-01","08-15","09-30","10-15"],r:[15,60],so:"Mavras, Pusztagold, Spitzpaprika",u:["roh","gefüllt","Ofen","Ajvar"],t:"Grüne Paprika ist unreif geerntet, rote und gelbe sind ausgereift und süßer."},
+ {id:"aubergine",n:"Aubergine",k:"frucht",fx:48,gh:["06-01","10-31"],h:["08-01","08-15","09-15","09-30"],r:[10,58],so:"Black Beauty, Rosa Bianca, Listada de Gandia",u:["Ofen","Moussaka","gegrillt","Baba Ghanoush"],t:"Roh nicht genießbar. Vor dem Braten salzen, das zieht Wasser."},
+ {id:"kuerbis",n:"Kürbis",k:"frucht",h:["07-20","08-20","10-31","11-15"],st:75,r:[15,62],so:"Hokkaido, Butternut, Muskatkürbis, Spaghettikürbis",u:["Suppe","Ofen","Curry","Kuchen"],t:"Hokkaido kann man mit Schale essen. Ganze Kürbisse lagern kühl und trocken monatelang."},
+ {id:"mais",n:"Zuckermais",k:"frucht",h:["07-20","08-01","09-30","10-20"],r:[10,56],so:"Golden Bantam, Damaun, Mirai",u:["gegrillt","gekocht","Salat"],t:"Nach der Ernte wird Zucker schnell zu Stärke. Frisch ist Mais am süßesten."},
+ {id:"bohne",n:"Grüne Bohne",k:"huelse",h:["06-15","07-01","09-30","10-20"],r:[10,62],so:"Buschbohne Saxa, Stangenbohne Blauhilde, Neckarkönigin",u:["Bohnensalat","Gemüse","Eintopf"],t:"Roh giftig durch Phasin. Immer mindestens zehn Minuten kochen."},
+ {id:"erbse",n:"Erbse & Zuckerschote",k:"huelse",h:["06-01","06-10","07-31","08-31"],r:[25,64],so:"Kleine Rheinländerin, Zuckerschote Norli, Kelvedon Wonder",u:["frisch roh","Gemüse","Suppe","Risotto"],t:"Frisch aus der Schote schmecken Erbsen süß. Zuckerschoten isst man mit Hülse."},
+ {id:"dickebohne",n:"Dicke Bohne",k:"huelse",h:["06-15","06-25","07-20","07-31"],r:[30,62],so:"Hangdown, Dreifach Weiße",u:["Eintopf","Püree","mit Speck"],t:"Die Kerne nach dem Blanchieren aus der zähen Haut drücken."},
+ {id:"spargel",n:"Spargel",k:"spross",s:.5,h:["04-10","04-25","06-15","06-24"],r:[34,58],so:"Ravel, Gijnlim, Backlim, Grünspargel Grolim",u:["gekocht mit Hollandaise","Suppe","Ofen","grün in der Pfanne"],t:"Die Saison endet traditionell am Johannistag (24. Juni), damit sich die Pflanzen erholen."},
+ {id:"rhabarber",n:"Rhabarber",k:"spross",gh:["03-01","04-05"],s:.5,h:["04-01","04-10","05-31","06-24"],r:[38,64],so:"Holsteiner Blut, Frambozen Rood, Elmsfeuer",u:["Kompott","Kuchen","Marmelade","Schorle"],t:"Nur die Stiele essen, die Blätter enthalten viel Oxalsäure. Geerntet wird bis zum Johannistag."},
+ {id:"fenchel",n:"Fenchel",k:"spross",fr:1,h:["06-01","06-15","10-31","12-10"],r:[25,58],so:"Finale, Orion, Rondo",u:["roh als Salat","Ofen","geschmort"],t:"Das Fenchelgrün ist ein feines Würzkraut."},
+ {id:"staudensellerie",n:"Staudensellerie",k:"spross",fr:1,h:["05-20","06-15","10-31","12-10"],r:[25,60],so:"Tango, Golden Spartan",u:["roh mit Dip","Suppe","Soffritto"],t:"Die Fasern an der Außenseite mit dem Sparschäler abziehen."},
+ {id:"artischocke",n:"Artischocke",k:"spross",oref:40,ch:["11-01","02-15","04-30","05-31"],h:["07-01","07-20","09-15","10-15"],r:[28,52],o:"Italien, Spanien, Frankreich",so:"Romanesco, Violetto, Camus de Bretagne",u:["gekocht mit Dip","Artischockenböden","eingelegt"],t:"Die Blätter einzeln abzupfen und den fleischigen Teil in einen Dip tauchen."}
 ];
 FRUITS.push(...VEG);
 /* Kühle-Saison-Gemüse: in warmen Klimazonen (effektiver Breitengrad < 43°) als Wintergemüse angebaut */
@@ -866,7 +864,7 @@ function card(w,mode){
   const m=state.month;
   let meta=mode==="store"?"Lagerware bis "+fmt(w.e+w.st):mode==="soon"?"Ernte ab "+fmt(w.s):mode==="glass"?(w.glassOnly?"Unter Glas: "+fmt(w.gh[0])+" – "+fmt(w.gh[1]):"Freiland: "+seasonText(w)):"Ernte: "+seasonText(w);
   return `<button type="button" class="card" data-id="${w.f.id}">
-    <span class="dot" style="--c:${w.f.c}"></span><span class="card-name">${esc(w.f.n)}</span>
+    <span class="card-name">${esc(w.f.n)}</span>
     <span class="pills">${mode==="soon"?'<span class="pill">bald</span>':statusPill(w,m)}${w.edge?'<span class="pill edge">Grenzlage</span>':""}</span>
     <span class="card-meta">${meta}</span>
     <span class="card-use"><span class="use-lbl">Verwendung</span> ${useText(w.f.id)}</span>
@@ -903,7 +901,7 @@ function render(){
     group(`Kommt im ${MONTHS[nm]}`,"c-edge",soon,"soon",`Im ${MONTHS[nm]} beginnt keine neue Ernte.`)+
     `<section class="group"><div class="group-head"><span class="key" style="background:var(--empty)"></span><h3>Wächst bei dir nicht im Freiland</h3><span class="count num">${foreign.length}</span></div>
      <p class="empty" style="font-size:.92rem">Diese Arten kommen an deinem Standort nur als Importware in den Handel. Antippen zeigt, wann sie im Anbaugebiet Saison haben.</p>
-     <div class="tags">${foreign.map(w=>`<button type="button" class="tag" data-id="${w.f.id}"><span class="dot" style="--c:${w.f.c}"></span>${esc(w.f.n)}</button>`).join("")}</div></section>`;
+     <div class="tags">${foreign.map(w=>`<button type="button" class="tag" data-id="${w.f.id}">${esc(w.f.n)}</button>`).join("")}</div></section>`;
 
   renderProfile(W);renderRegions();renderCalendar(W);renderMonths();renderFilters();
 }
@@ -969,7 +967,7 @@ function renderCalendar(W){
     if(w.f.k!==lastCat){lastCat=w.f.k;body+=`<tr><td class="cat-row" colspan="25">${CAT[lastCat]}</td></tr>`;}
     let cells="";
     for(let mm=0;mm<12;mm++)for(let h=0;h<2;h++){const s=halfStatus(w,mm,h);cells+=`<td class="cell${mm===m?" sel":""}${h===0&&mm===0?" m0":""}"><i class="${s?"c-"+s:""}"></i></td>`;}
-    body+=`<tr><th class="rowh" scope="row"><button type="button" data-id="${w.f.id}"><span class="dot" style="--c:${w.f.c}"></span>${esc(w.f.n)}</button></th>${cells}</tr>`;
+    body+=`<tr><th class="rowh" scope="row"><button type="button" data-id="${w.f.id}">${esc(w.f.n)}</button></th>${cells}</tr>`;
   }
   if(!rows.length)body=`<tr><td colspan="25" style="padding:18px" class="muted">Für die gewählten Kategorien wächst an diesem Standort nichts regional.</td></tr>`;
   $("cal").innerHTML=head+"<tbody>"+body+"</tbody>";
@@ -1002,7 +1000,7 @@ function openDetail(id){
   const strip=w.regional?`<div><div class="strip" aria-hidden="true">${MONTHS.map((_,mm)=>[0,1].map(h=>{const s=halfStatus(w,mm,h);return `<i class="${s?"c-"+s:""}${mm===state.month?" sel":""}"></i>`;}).join("")).join("")}</div>
     <div class="strip-lbl">${MSHORT.map(s=>`<span>${s}</span>`).join("")}</div></div>`:"";
   $("dlg-body").innerHTML=`
-    <div class="dlg-head"><span class="dot" style="--c:${f.c}"></span><h2 id="dlg-title">${esc(f.n)}</h2><button class="close" type="button" aria-label="Schließen">×</button></div>
+    <div class="dlg-head"><h2 id="dlg-title">${esc(f.n)}</h2><button class="close" type="button" aria-label="Schließen">×</button></div>
     <div class="eyebrow">${CAT[f.k]} · ${esc(state.loc.name)}</div>
     <dl class="facts">${facts}</dl>
     ${w.cool&&w.regional?`<p class="note">Im warmen Klima wird ${esc(f.n)} als Wintergemüse angebaut, im Sommer ist es dort zu heiß.</p>`:""}

@@ -1,5 +1,5 @@
 // Automatisch erzeugt von tools/build.mjs – nicht von Hand ändern.
-const CACHE="saisonobst-2283c2c745";
+const CACHE="saisonobst-5aa003ac43";
 const ASSETS=["./","datenschutz.html","fonts/Alegreya-latin-500.woff2","fonts/Alegreya-latin-ext-500.woff2","fonts/AlegreyaSans-latin-400.woff2","fonts/AlegreyaSans-latin-500.woff2","fonts/AlegreyaSans-latin-700.woff2","fonts/AlegreyaSans-latin-ext-400.woff2","fonts/AlegreyaSans-latin-ext-500.woff2","fonts/AlegreyaSans-latin-ext-700.woff2","fonts/fonts.css","icons/apple-touch-icon.png","icons/favicon-32.png","icons/icon-192.png","icons/icon-512.png","icons/icon.svg","icons/maskable-512.png","impressum.html","index.html","legal.css","manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith("saisonobst-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

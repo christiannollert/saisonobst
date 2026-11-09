@@ -103,6 +103,9 @@ button,input,select{font:inherit;color:inherit}
 .card{display:grid;grid-template-columns:minmax(0,1fr);gap:4px 10px;align-items:center;text-align:left;padding:12px 14px 14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s, transform .15s}
 .card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .card-name{font-weight:700;font-size:1.05rem;line-height:1.2}
+.card:has(>.card-img){grid-template-columns:56px minmax(0,1fr);column-gap:12px}
+.card:has(>.card-img)>.card-name,.card:has(>.card-img)>.pills,.card:has(>.card-img)>.card-meta{grid-column:2}
+.card-img{grid-column:1;grid-row:1 / span 3;align-self:start;width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--empty)}
 .card-meta{grid-column:1 / -1;font-size:.86rem;color:var(--muted)}
 .card-use{grid-column:1 / -1;font-size:.88rem;line-height:1.35;color:var(--ink)}
 .use-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted);margin-right:2px}
@@ -179,6 +182,9 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 .dlg{padding:22px 22px 20px;display:flex;flex-direction:column;gap:14px}
 .dlg-head{display:flex;align-items:center;gap:12px}
 .dlg-head h2{font-size:1.7rem;flex:1}
+.dlg-img{order:-1;flex:none;width:72px;height:72px;border-radius:var(--r);object-fit:cover;background:var(--empty)}
+.foto-credit{margin:0;font-size:.78rem;color:var(--muted)}
+.foto-credit a{color:inherit}
 .close{border:0;background:var(--empty);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.2rem;line-height:1}
 .dlg .facts{font-size:.98rem}
 .dlg .strip{grid-template-columns:repeat(24,1fr);gap:2px}
@@ -288,13 +294,14 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
     <p>Bei Gemüse zeigt die App zusätzlich, wann regionale Ware aus Gewächshaus oder Folientunnel kommt, etwa Tomaten, Gurken, Paprika und früher Salat. Wintergemüse wie Grünkohl, Lauch oder Feldsalat bleibt über den Winter auf dem Feld. In sehr kalten Regionen mit Dauerfrost ist das nur eingeschränkt möglich.</p>
     <p>Grenzen: Niederschlag, Wüsten- und Monsunklima, Mikroklima und einzelne Sorten bildet das Modell nicht ab. Für München weicht das Modell nur in 31 von 804 Monatswerten vom Bayerischen Saisonkalender ab, meist in Randmonaten oder wo sich die Kalender untereinander widersprechen. Für Deutschland, Österreich und die Schweiz sind die Angaben daher verlässlich, im übrigen Europa grob, außerhalb Europas nur eine Näherung. Wetter verschiebt die Ernte von Jahr zu Jahr um ein bis zwei Wochen.</p>
     <p>Rezept-Tipps: Die Detailansicht verlinkt je Sorte ein Rezept von GuteKueche.at mit mindestens 4,3 Sternen und 15 Bewertungen. Geprüft wurde je Sorte nur eine Auswahl der Rezepte, es ist also ein gut bewertetes Rezept, nicht zwingend das beste. Die Bewertungen in der App haben den Stand November 2026, aktuell stehen sie auf der Rezeptseite. Die Seite ist österreichisch geprägt, dort heißt etwa die Tomate Paradeiser. Wo kein Rezept die Regel erfüllt, gibt es keinen Tipp. Zusätzlich führt ein Link zur Rezeptsuche auf Chefkoch.de, sortiert nach Bewertung. Diese Treffer kommen direkt von Chefkoch und wurden nicht geprüft. Dort können auch Rezepte mit wenigen Bewertungen oben stehen.</p>
+    <p>Fotos: Alle Bilder stammen von Wikimedia Commons und stehen unter freien Lizenzen. Urheber und Lizenz stehen in der Detailansicht jeder Sorte. Für die App wurden die Bilder quadratisch zugeschnitten und verkleinert.</p>
     <p>Die Ortssuche nutzt eine eingebaute Liste mit rund 280 Orten und allen deutschen, österreichischen und Schweizer PLZ-Regionen. Unbekannte Orte sucht sie zusätzlich online über den kostenlosen Geodienst von Open-Meteo. Dabei wird nur der eingegebene Ortsname übertragen. Alles andere funktioniert auch ohne Internet.</p>
   </details>
   <footer class="appfoot">
     <p><strong>Ohne Gewähr:</strong> Die Erntezeiten sind aus Saisonkalendern und einem einfachen Klimamodell geschätzt. Vor Ort und von Jahr zu Jahr können sie abweichen.</p>
-    <p>Online-Ortssuche: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo.com</a> (CC BY 4.0), Ortsdaten von <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0). Schriften: Alegreya und Alegreya Sans (SIL Open Font License), lokal eingebunden.</p>
+    <p>Online-Ortssuche: <a href="https://open-meteo.com/" rel="noopener">Open-Meteo.com</a> (CC BY 4.0), Ortsdaten von <a href="https://www.geonames.org/" rel="noopener">GeoNames</a> (CC BY 4.0). Schriften: Alegreya und Alegreya Sans (SIL Open Font License), lokal eingebunden. Fotos: Wikimedia Commons, Urheber und Lizenzen im Bildnachweis.</p>
     <p id="samsung" hidden><strong>Als App installieren:</strong> Der Samsung-Browser löst dabei oft eine Warnung von Google Play Protect aus. Öffne die Seite dafür in Chrome. Hier im Browser funktioniert alles auch ohne Installation. <a id="inchrome" class="appfoot-btn" href="#">In Chrome öffnen</a></p>
-    <p class="appfoot-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><button type="button" id="install" hidden>App installieren</button><span id="appstate" aria-live="polite"></span></p>
+    <p class="appfoot-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><a href="bildnachweis.html">Bildnachweis</a><button type="button" id="install" hidden>App installieren</button><span id="appstate" aria-live="polite"></span></p>
     <button type="button" id="update" hidden>Neue Version da: jetzt neu laden</button>
   </footer>
 </div>
@@ -401,6 +408,119 @@ const USE={
 };
 /* Rezept-Tipps von gutekueche.at. Stand der Bewertungen: November 2026.
    Regel: mindestens 4,3 Sterne und 15 Bewertungen, sonst kein Tipp. */
+/* Fotos von Wikimedia Commons, zugeschnitten und verkleinert (app/img/). a Urheber, l Lizenz, u Lizenztext, f Datei.
+   Die Liste erzeugt auch die Seite Bildnachweis (tools/build.mjs). */
+const BILDER={
+ "apfel":{"a":"Abhijit Tembhekar from Mumbai, India","l":"CC BY 2.0","u":"https://creativecommons.org/licenses/by/2.0","f":"Red Apple.jpg"},
+ "birne":{"a":"Rhododendrites","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"D'anjou pear.jpg"},
+ "quitte":{"a":"Conrad Nutschan at de.wikipedia","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Quitte am Baum.jpg"},
+ "mispel":{"a":"Aconcagua","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Mispeln.jpg"},
+ "suesskirsche":{"a":"Benjamint444, edited by Fir0002","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Cherry Stella444.jpg"},
+ "sauerkirsche":{"a":"Emilian Robert Vicol from Com. Balanesti, Romania","l":"CC BY 2.0","u":"https://creativecommons.org/licenses/by/2.0","f":"Morello Cherry (4792554810).jpg"},
+ "zwetschge":{"a":"Johannes Aubele (Joooo at de.wikipedia)","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Zwetschge.JPG"},
+ "mirabelle":{"a":"J-L Carton","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Mirabelles.jpg"},
+ "reneklode":{"a":"Mutney","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Greengages, greengrocer's display, Penzance, August 2023.jpg"},
+ "aprikose":{"a":"Fir0002","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Apricots.jpg"},
+ "pfirsich":{"a":"Cary Bass","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Bowl of peaches with colour enhanced.jpg"},
+ "erdbeere":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Garden strawberry (Fragaria × ananassa) single2.jpg"},
+ "himbeere":{"a":"Vassil","l":"Public domain","u":"","f":"Framboise Margy 3.jpg"},
+ "brombeere":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Blackberries (Rubus fruticosus).jpg"},
+ "rjoh":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Rode bessen (Ribes rubrum).jpg"},
+ "sjoh":{"a":"Saxo","l":"Public domain","u":"","f":"Schwarzejohannisbeere.jpg"},
+ "stachel":{"a":"neurovelho","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Gooseberries.jpg"},
+ "heidel":{"a":"Petar Milošević","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Dish of blueberries.jpg"},
+ "traube":{"a":"U.S. Department of Agriculture, Agricultural Research Service","l":"Public domain","u":"","f":"Weintraube 01 KMJ.jpg"},
+ "kiwibeere":{"a":"Rillke","l":"CC BY 3.0","u":"https://creativecommons.org/licenses/by/3.0","f":"Actinidia arguta fruit - hardy kiwi - Kiwibeere 05.jpg"},
+ "aronia":{"a":"Ayotte, Gilles, 1948-","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Aronia melanocarpa 15-p.bot-aroni.melano-06.jpg"},
+ "preisel":{"a":"Robert Flogaus-Faust","l":"CC BY 4.0","u":"https://creativecommons.org/licenses/by/4.0","f":"Vaccinium vitis-idaea 2 RF.jpg"},
+ "sanddorn":{"a":"Hans Hillewaert","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Hippophae rhamnoides.jpg"},
+ "holunder":{"a":"Kpjas","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Sambucus nigra fruit kpjas 26082005 1.jpg"},
+ "schlehe":{"a":"Manfred Werner - Tsui","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Schlehdorn (Prunus spinosa) Nationalpark Donau-Auen Orth an der Donau 2012 c.jpg"},
+ "hagebutte":{"a":"Ritchie66.eu","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Hagebutte (Rosa canina).jpg"},
+ "kornel":{"a":"Car Tick","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Cornelian cherry 1.JPG"},
+ "felsenbirne":{"a":"TraceyR","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Amelanchier Lamarckii.JPG"},
+ "vogelbeere":{"a":"George Chernilevsky","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Sorbus aucuparia 2022 G1.jpg"},
+ "moltebeere":{"a":"Primordial~commonswiki","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Hjortron.png"},
+ "walnuss":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Walnuts - whole and open with halved kernel.jpg"},
+ "hasel":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Hazelnuts (Corylus avellana) - whole with kernels.jpg"},
+ "kastanie":{"a":"Dominicus Johannes Bergsma","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Afgevallen kastanje van een Tamme kastanje (Castanea sativa) 17-10-2021 (d.j.b.) 01.jpg"},
+ "mandel":{"a":"David R. Tribble (Loadmaster)","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Almonds 1.jpg"},
+ "feige":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Fig (Ficus carica) fruit halved.jpg"},
+ "orange":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Oranges - whole-halved-segment.jpg"},
+ "mandarine":{"a":"tracy from north brookfield,Massachusetts, usa","l":"CC BY 2.0","u":"https://creativecommons.org/licenses/by/2.0","f":"Oh my darling.jpg"},
+ "zitrone":{"a":"André Karwath aka Aka","l":"CC BY-SA 2.5","u":"https://creativecommons.org/licenses/by-sa/2.5","f":"Lemon.jpg"},
+ "kaki":{"a":"Rhododendrites","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Persimmon top.jpg"},
+ "granat":{"a":"Augustus Binu","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Pomegranate (fruit).jpg"},
+ "olive":{"a":"Filipe Cera","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Olea europaea var. sylvestris.jpg"},
+ "kiwi":{"a":"André Karwath aka Aka","l":"CC BY-SA 2.5","u":"https://creativecommons.org/licenses/by-sa/2.5","f":"Kiwi aka.jpg"},
+ "melone":{"a":"USDA, Foto Scott Bauer","l":"Public domain","u":"","f":"Cucumis melo var. reticulatus (photo by Scott Bauer).jpg"},
+ "kaktusfeige":{"a":"Zeynel Cebeci","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Hint inciri - Indian fig - Opuntia ficus-indica 02.JPG"},
+ "wollmispel":{"a":"Katorisi","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Japanese Loquat, Minamiboso city, Japan.jpg"},
+ "mango":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Mangos - single and halved.jpg"},
+ "banane":{"a":"Krzysztof Golik","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Bananas on black background 02.jpg"},
+ "ananas":{"a":"Diego Delso","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Piña (Ananas comosus), Parque Nacional de Lokobe, Nosy Be, Madagascar, 2025-09-21, DD 39.jpg"},
+ "papaya":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Papaya - longitudinal section.jpg"},
+ "avocado":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Avocado Hass - single and halved.jpg"},
+ "passion":{"a":"Alexander Klink","l":"CC BY 3.0","u":"https://creativecommons.org/licenses/by/3.0","f":"Passiflora Edulis Open Fruit2.jpg"},
+ "litschi":{"a":"Sanjay Acharya","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Lychee Fruit.jpg"},
+ "dattel":{"a":"Samsule2","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Pile of Wet Dates at Barkin Dogo Market, Kaduna North.jpg"},
+ "blumenkohl":{"a":"Coyau","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Chou-fleur 02.jpg"},
+ "brokkoli":{"a":"Coyau","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Brocoli 03.jpg"},
+ "weisskohl":{"a":"Coyau","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Chou cabus blanc 01.jpg"},
+ "rotkohl":{"a":"Elrond","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Rotkohl (Brassica oleracea convar).JPG"},
+ "wirsing":{"a":"Coyau","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Chou de Milan 02.jpg"},
+ "gruenkohl":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Boerenkool.jpg"},
+ "rosenkohl":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Spruitjes.jpg"},
+ "kohlrabi":{"a":"Coyau","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Chou-rave 10.jpg"},
+ "chinakohl":{"a":"Bayartai","l":"CC0","u":"http://creativecommons.org/publicdomain/zero/1.0/deed.en","f":"Napa cabbages.png"},
+ "spitzkohl":{"a":"Rainer Zenz","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Spitzkohl-2.jpg"},
+ "pakchoi":{"a":"Karl-Heinz Wellmann","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Baby Pak Choi (02).JPG"},
+ "kartoffel":{"a":"ZooFari","l":"Public domain","u":"","f":"Russet potato cultivar with sprouts.jpg"},
+ "moehre":{"a":"Kander","l":"Public domain","u":"","f":"Carrots.JPG"},
+ "rotebete":{"a":"Frank Schulenburg","l":"CC0","u":"http://creativecommons.org/publicdomain/zero/1.0/deed.en","f":"Beta vulgaris, San Francisco farmers market.jpg"},
+ "pastinake":{"a":"Quadell","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Parsnips-1.jpg"},
+ "petersilienwurzel":{"a":"MarkusHagenlocher","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Wurzelpetersilie Wurzel.jpg"},
+ "sellerie":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Knolselderij plant (Apium graveolens var. rapaceum) 'Dolvi'.jpg"},
+ "schwarzwurzel":{"a":"Benreis","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Schwarzwurzeln roh.jpg"},
+ "radieschen":{"a":"Jengod","l":"Public domain","u":"","f":"Radish 3371103037 4ab07db0bf o.jpg"},
+ "rettich":{"a":"Eric Polk","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Daikon radish - Minowase.jpg"},
+ "topinambur":{"a":"Robin","l":"CC BY-SA 2.0","u":"https://creativecommons.org/licenses/by-sa/2.0","f":"Jerusalem artichokes.jpg"},
+ "steckruebe":{"a":"Garitzko","l":"Public domain","u":"","f":"Steckrübe (Brassica napus subsp rapifera).jpg"},
+ "suesskartoffel":{"a":"Llez","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Ipomoea batatas 006.JPG"},
+ "meerrettich":{"a":"Kritzolina","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Gemüsestand am Viktualienmarkt München 04.jpg"},
+ "zwiebel":{"a":"CHK46","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Zwiebeln auf Antigua.jpg"},
+ "fruehlingszwiebel":{"a":"Weyham","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Spring Onions at Bakin Dogo market Kaduna 04.jpg"},
+ "lauch":{"a":"Amada44","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Leek on white background - 0947.jpg"},
+ "knoblauch":{"a":"Ivar Leidus","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Garlic bulbs and cloves.jpg"},
+ "baerlauch":{"a":"Trish Steel","l":"CC BY-SA 2.0","u":"https://creativecommons.org/licenses/by-sa/2.0","f":"Wild garlic, Verditch Chase - geograph.org.uk - 1285584.jpg"},
+ "schalotte":{"a":"Charles P.","l":"Public domain","u":"","f":"Shallots - sliced and whole.jpg"},
+ "kopfsalat":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Kropsla herfst.jpg"},
+ "eisberg":{"a":"Zolfeqar Fatihzadeh","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Iceberg lettuce in Poplar Farmhouse (87696).jpg"},
+ "pfluecksalat":{"a":"Frank C. Müller","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Salat Lollo Bionda (fcm).jpg"},
+ "feldsalat":{"a":"Schwäbin","l":"CC BY-SA 3.0 de","u":"https://creativecommons.org/licenses/by-sa/3.0/de/deed.en","f":"Ackersalat02.jpg"},
+ "spinat":{"a":"Nillerdk","l":"CC BY 3.0","u":"https://creativecommons.org/licenses/by/3.0","f":"Spinach leaves.jpg"},
+ "mangold":{"a":"Grendelkhan","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Rainbow chard for sale at the Campbell farmers market.jpg"},
+ "rucola":{"a":"Schlaghecken Josef","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Rucola Fäulnis in Packung-1-JS.jpg"},
+ "endivie":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Cichorium endivia var. crispum (01).jpg"},
+ "chicoree":{"a":"Okapi","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Endivie.jpg"},
+ "radicchio":{"a":"Wazouille","l":"Public domain","u":"","f":"Trevisane1.jpg"},
+ "zuckerhut":{"a":"Schlaghecken Josef","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Zuckerhut (Cichorium intybus var. foliosum) unter Schutznetz-2-Josef Schlaghecken.jpg"},
+ "tomate":{"a":"Softeis","l":"CC BY-SA 3.0","u":"http://creativecommons.org/licenses/by-sa/3.0/","f":"Tomato je.jpg"},
+ "gurke":{"a":"Jason Zhang","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Ryerson Market cucumbers on sale.jpg"},
+ "zucchini":{"a":"Nostepinne from Tacoma","l":"CC BY 2.0","u":"https://creativecommons.org/licenses/by/2.0","f":"Cucurbita pepo Black Zucchini First -Zucchini of the season.jpg"},
+ "paprika":{"a":"Nikodem Nijaki","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Capsicum annuum fruits IMGP0049.jpg"},
+ "aubergine":{"a":"Azreey","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"An aubergine-eggplant-brinjal plant with a hanging fruit..jpg"},
+ "kuerbis":{"a":"George Chernilevsky","l":"Public domain","u":"","f":"Cucurbita 2011 G1.jpg"},
+ "mais":{"a":"wstoakLL (English Wikipedia)","l":"Public domain","u":"","f":"VegCorn.jpg"},
+ "bohne":{"a":"Undeka 11","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Macro of Fresh Green Beans Buncis.jpg"},
+ "erbse":{"a":"Zmu'az4Z","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Pea pod.jpg"},
+ "dickebohne":{"a":"Rasbak","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Vicia faba pod (04).jpg"},
+ "spargel":{"a":"Evan-Amos","l":"CC BY-SA 3.0","u":"https://creativecommons.org/licenses/by-sa/3.0","f":"Asparagus-Bundle.jpg"},
+ "rhabarber":{"a":"Evan-Amos","l":"Public domain","u":"","f":"CSA-Rhubarb.jpg"},
+ "fenchel":{"a":"Tiia Monto","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Fennel bulb.jpg"},
+ "staudensellerie":{"a":"Forest & Kim Starr","l":"CC BY 3.0","u":"https://creativecommons.org/licenses/by/3.0","f":"Starr 070730-7896 Apium graveolens var. dulce.jpg"},
+ "artischocke":{"a":"HaJunkiyada","l":"CC BY-SA 4.0","u":"https://creativecommons.org/licenses/by-sa/4.0","f":"Liat Portal for Foodie Disorder - North African style artichokes boiled with lemon.jpg"}
+};
 const REZEPTE={
  apfel:{"t":"Apfelmus","u":"apfelmus-rezept-2387","r":4.6,"v":21294},
  birne:{"t":"Birnenmus","u":"birnenmus-rezept-6077","r":4.4,"v":1017},
@@ -870,7 +990,7 @@ function card(w,mode){
   const m=state.month;
   let meta=mode==="store"?"Lagerware bis "+fmt(w.e+w.st):mode==="soon"?"Ernte ab "+fmt(w.s):mode==="glass"?(w.glassOnly?"Unter Glas: "+fmt(w.gh[0])+" – "+fmt(w.gh[1]):"Freiland: "+seasonText(w)):"Ernte: "+seasonText(w);
   return `<button type="button" class="card" data-id="${w.f.id}">
-    <span class="card-name">${esc(w.f.n)}</span>
+    <span class="card-name">${esc(w.f.n)}</span>${BILDER[w.f.id]?`<img class="card-img" src="img/${w.f.id}.jpg" alt="" width="56" height="56" loading="lazy" decoding="async" onerror="this.remove()">`:""}
     <span class="pills">${mode==="soon"?'<span class="pill">bald</span>':statusPill(w,m)}${w.edge?'<span class="pill edge">Grenzlage</span>':""}</span>
     <span class="card-meta">${meta}</span>
     <span class="card-use"><span class="use-lbl">Verwendung</span> ${useText(w.f.id)}</span>
@@ -983,6 +1103,10 @@ function renderCalendar(W){
 const dlg=$("dlg");
 /* Suchbegriff für Chefkoch: der Sortenname ohne Zusatz, wo nötig ein gebräuchlicheres Wort */
 const CK_BEGRIFF={kastanie:"Maronen",mais:"Mais"};
+function fotoCredit(id){
+  const b=BILDER[id];if(!b)return "";
+  return `<p class="foto-credit">Foto: ${esc(b.a)}, ${esc(b.l)}, <a href="https://commons.wikimedia.org/wiki/File:${encodeURIComponent(b.f.replace(/ /g,"_"))}" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a></p>`;
+}
 function rezeptBlock(id){
   const f=FRUITS.find(x=>x.id===id);if(!f||f.always)return "";
   const z=REZEPTE[id];
@@ -1011,7 +1135,7 @@ function openDetail(id){
   const strip=w.regional?`<div><div class="strip" aria-hidden="true">${MONTHS.map((_,mm)=>[0,1].map(h=>{const s=halfStatus(w,mm,h);return `<i class="${s?"c-"+s:""}${mm===state.month?" sel":""}"></i>`;}).join("")).join("")}</div>
     <div class="strip-lbl">${MSHORT.map(s=>`<span>${s}</span>`).join("")}</div></div>`:"";
   $("dlg-body").innerHTML=`
-    <div class="dlg-head"><h2 id="dlg-title">${esc(f.n)}</h2><button class="close" type="button" aria-label="Schließen">×</button></div>
+    <div class="dlg-head"><h2 id="dlg-title">${esc(f.n)}</h2>${BILDER[f.id]?`<img class="dlg-img" src="img/${f.id}.jpg" alt="" width="72" height="72" onerror="this.remove()">`:""}<button class="close" type="button" aria-label="Schließen">×</button></div>
     <div class="eyebrow">${CAT[f.k]} · ${esc(state.loc.name)}</div>
     <dl class="facts">${facts}</dl>
     ${w.cool&&w.regional?`<p class="note">Im warmen Klima wird ${esc(f.n)} als Wintergemüse angebaut, im Sommer ist es dort zu heiß.</p>`:""}
@@ -1020,7 +1144,8 @@ function openDetail(id){
     <div><h4>Verwendung</h4><p>${esc(useText(f.id))}</p></div>
     ${rezeptBlock(f.id)}
     <div><h4>Typische Sorten</h4><p>${esc(f.so)}</p></div>
-    <div><h4>Tipp</h4><p>${esc(f.t)}</p></div>`;
+    <div><h4>Tipp</h4><p>${esc(f.t)}</p></div>
+    ${fotoCredit(f.id)}`;
   dlg.querySelector(".close").addEventListener("click",()=>dlg.close());
   if(typeof dlg.showModal==="function")dlg.showModal();else dlg.setAttribute("open","");
 }

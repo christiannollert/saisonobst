@@ -187,6 +187,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 .dlg p{margin:0}
 .rez-link{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);color:inherit;text-decoration:none}
 .rez-link:hover{border-color:var(--accent)}
+.rez-link+.rez-link{margin-top:6px}
 .rez-link b{display:block;color:var(--accent)}
 .rez-meta{display:block;font-size:.86rem;color:var(--muted)}
 .dlg h4{margin:0 0 2px;font-size:.74rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
@@ -285,7 +286,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
     <p>Pro Grad verschiebt sich die Ernte um etwa 3 Tage, höchstens um 40 Tage. Zitrusfrüchte und andere Winterfrüchte verschieben sich kaum. Ob eine Frucht bei dir regional wächst, hängt davon ab, ob der effektive Breitengrad im Anbaubereich der Frucht liegt. Auf der Südhalbkugel werden alle Zeiten um ein halbes Jahr versetzt.</p>
     <p>Bei Gemüse zeigt die App zusätzlich, wann regionale Ware aus Gewächshaus oder Folientunnel kommt, etwa Tomaten, Gurken, Paprika und früher Salat. Wintergemüse wie Grünkohl, Lauch oder Feldsalat bleibt über den Winter auf dem Feld. In sehr kalten Regionen mit Dauerfrost ist das nur eingeschränkt möglich.</p>
     <p>Grenzen: Niederschlag, Wüsten- und Monsunklima, Mikroklima und einzelne Sorten bildet das Modell nicht ab. Für München weicht das Modell nur in 31 von 804 Monatswerten vom Bayerischen Saisonkalender ab, meist in Randmonaten oder wo sich die Kalender untereinander widersprechen. Für Deutschland, Österreich und die Schweiz sind die Angaben daher verlässlich, im übrigen Europa grob, außerhalb Europas nur eine Näherung. Wetter verschiebt die Ernte von Jahr zu Jahr um ein bis zwei Wochen.</p>
-    <p>Rezept-Tipps: Die Detailansicht verlinkt je Sorte ein Rezept von GuteKueche.at mit mindestens 4,3 Sternen und 15 Bewertungen. Geprüft wurde je Sorte nur eine Auswahl der Rezepte, es ist also ein gut bewertetes Rezept, nicht zwingend das beste. Die Bewertungen in der App haben den Stand November 2026, aktuell stehen sie auf der Rezeptseite. Die Seite ist österreichisch geprägt, dort heißt etwa die Tomate Paradeiser. Wo kein Rezept die Regel erfüllt, gibt es keinen Tipp.</p>
+    <p>Rezept-Tipps: Die Detailansicht verlinkt je Sorte ein Rezept von GuteKueche.at mit mindestens 4,3 Sternen und 15 Bewertungen. Geprüft wurde je Sorte nur eine Auswahl der Rezepte, es ist also ein gut bewertetes Rezept, nicht zwingend das beste. Die Bewertungen in der App haben den Stand November 2026, aktuell stehen sie auf der Rezeptseite. Die Seite ist österreichisch geprägt, dort heißt etwa die Tomate Paradeiser. Wo kein Rezept die Regel erfüllt, gibt es keinen Tipp. Zusätzlich führt ein Link zur Rezeptsuche auf Chefkoch.de, sortiert nach Bewertung. Diese Treffer kommen direkt von Chefkoch und wurden nicht geprüft. Dort können auch Rezepte mit wenigen Bewertungen oben stehen.</p>
     <p>Die Ortssuche nutzt eine eingebaute Liste mit rund 280 Orten und allen deutschen, österreichischen und Schweizer PLZ-Regionen. Unbekannte Orte sucht sie zusätzlich online über den kostenlosen Geodienst von Open-Meteo. Dabei wird nur der eingegebene Ortsname übertragen. Alles andere funktioniert auch ohne Internet.</p>
   </details>
   <footer class="appfoot">
@@ -978,10 +979,15 @@ function renderCalendar(W){
 
 /* ---------- Detailansicht ---------- */
 const dlg=$("dlg");
+/* Suchbegriff für Chefkoch: der Sortenname ohne Zusatz, wo nötig ein gebräuchlicheres Wort */
+const CK_BEGRIFF={kastanie:"Maronen",mais:"Mais"};
 function rezeptBlock(id){
-  const z=REZEPTE[id];if(!z)return "";
-  const stars=z.r.toFixed(1).replace(".",",");
-  return `<div><h4>Rezept-Tipp</h4><a class="rez-link" href="https://www.gutekueche.at/${z.u}" target="_blank" rel="noopener noreferrer"><b>${esc(z.t)}</b><span class="rez-meta">${stars} von 5 Sternen, ${z.v.toLocaleString("de-DE")} Bewertungen · auf GuteKueche.at</span></a></div>`;
+  const f=FRUITS.find(x=>x.id===id);if(!f||f.always)return "";
+  const z=REZEPTE[id];
+  const tipp=z?`<a class="rez-link" href="https://www.gutekueche.at/${z.u}" target="_blank" rel="noopener noreferrer"><b>${esc(z.t)}</b><span class="rez-meta">${z.r.toFixed(1).replace(".",",")} von 5 Sternen, ${z.v.toLocaleString("de-DE")} Bewertungen · auf GuteKueche.at</span></a>`:"";
+  const begriff=CK_BEGRIFF[id]||f.n.split(/ [&(]/)[0];
+  const pfad=begriff.toLowerCase().split(" ").map(encodeURIComponent).join("+");
+  return `<div><h4>Rezept-Tipp</h4>${tipp}<a class="rez-link" href="https://www.chefkoch.de/rs/s0o3/${pfad}/Rezepte.html" target="_blank" rel="noopener noreferrer"><b>Bestbewertete Rezepte suchen</b><span class="rez-meta">Suchbegriff „${esc(begriff)}“ · auf Chefkoch.de</span></a></div>`;
 }
 function openDetail(id){
   const f=FRUITS.find(x=>x.id===id);if(!f)return;

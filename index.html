@@ -227,6 +227,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 .appfoot #update{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));z-index:20;padding:10px 18px;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.35)}
 /* App-Fassung: Hinweis für Samsung Internet */
 .samsung{margin:12px 0 4px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;background:var(--surface);font-size:.92rem}
+.samsung[hidden]{display:none}
 .samsung p{margin:0 0 .5em}
 .samsung .samsung-btns{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:0}
 .samsung-btn{display:inline-block;font-weight:700;color:var(--on-accent);background:var(--accent);border-radius:999px;padding:6px 14px;text-decoration:none;white-space:nowrap}
@@ -236,10 +237,10 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
 </head>
 <body>
 <div class="wrap">
-  <aside id="samsung" class="samsung" hidden>
+  <div id="samsung" class="samsung" hidden>
     <p><strong>Als App installieren?</strong> Im Samsung-Browser blockiert Google Play Protect die Installation oft als „Unsichere App“. Öffne die Seite dafür in Chrome. Ohne Installation funktioniert hier alles.</p>
     <p class="samsung-btns"><a id="inchrome" class="samsung-btn" href="#">In Chrome öffnen</a><button type="button" id="samsung-zu" class="samsung-zu">Nicht mehr anzeigen</button></p>
-  </aside>
+  </div>
   <header class="masthead">
     <div class="brand">
       <h1>Saison<span class="b-obst">obst</span> <span class="b-gem">&amp;&nbsp;<b>-gemüse</b></span></h1>

@@ -82,6 +82,10 @@ button,input,select{font:inherit;color:inherit}
 .summary h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700}
 .counts{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted)}
 .counts b{color:var(--ink);font-size:1.15rem}
+.counts button{border:0;background:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px}
+.counts button:hover{color:var(--ink);text-decoration-color:var(--accent)}
+.title-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.linkbtn{display:none;border:0;background:none;padding:6px 0;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:8px 4px}
 .kind{display:inline-flex;padding:3px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
 .kind button{border:0;background:transparent;border-radius:999px;padding:6px 16px;cursor:pointer;font-weight:500}
@@ -93,7 +97,8 @@ button,input,select{font:inherit;color:inherit}
 
 /* Haupt-Layout */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start;padding-top:12px}
-.group{display:flex;flex-direction:column;gap:12px;padding-bottom:28px}
+.group{display:flex;flex-direction:column;gap:12px;padding-bottom:28px;scroll-margin-top:12px}
+.group-head h3:focus{outline:none}
 .group-head{display:flex;align-items:center;gap:10px}
 .group-head h3{font-size:1.35rem}
 .group-head .count{font-size:.9rem;color:var(--muted)}
@@ -213,7 +218,32 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
   .search-row{flex-wrap:wrap}
   .search-row input{flex-basis:100%}
   .search-row .btn{flex:1}
-  .cards{grid-template-columns:1fr}
+  /* Mit gespeichertem Ort: Einleitung und Ortsfeld weg, die erste Sorte soll ohne Scrollen sichtbar sein */
+  .has-loc .masthead{padding-block:14px 10px;gap:10px}
+  .has-loc .brand h1{font-size:1.55rem}
+  .has-loc .brand p,.has-loc .search:not(.open){display:none}
+  .has-loc .linkbtn{display:inline-block}
+  .summary{padding-block:18px 4px}
+  .counts{gap:6px}
+  .counts b{font-size:1rem}
+  .counts button{border:1px solid var(--line);border-radius:999px;background:var(--surface);padding:5px 11px;text-decoration:none}
+  /* Kategorien: eine seitlich wischbare Zeile bis an den Bildschirmrand statt mehrerer Zeilen */
+  .toolbar{flex-direction:column;align-items:stretch;flex-wrap:nowrap}
+  .kind{align-self:flex-start}
+  .filters{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+  /* Sorten als kompakte Zeilen: Foto links, Name und Status daneben, Jahresstreifen darunter */
+  .cards{grid-template-columns:1fr;gap:6px}
+  .card,.card:has(>.card-img){grid-template-columns:44px minmax(0,1fr) auto;gap:3px 10px;padding:8px 10px}
+  .card-img{grid-row:1 / span 3;width:44px;height:44px;align-self:center}
+  .card>.card-name,.card:has(>.card-img)>.card-name{grid-column:2;grid-row:1;font-size:1rem;overflow-wrap:anywhere}
+  /* Zwei Schilder (etwa Gewächshaus und Grenzlage) bleiben nebeneinander; gestapelt wäre die Zeile 97 statt 71 px hoch */
+  .card>.pills,.card:has(>.card-img)>.pills{grid-column:3;grid-row:1;justify-content:flex-end;flex-wrap:nowrap}
+  .card>.card-meta,.card:has(>.card-img)>.card-meta{grid-column:2 / -1;grid-row:2;font-size:.8rem;line-height:1.25}
+  .card>.strip{grid-column:2 / -1;grid-row:3;margin-top:2px}
+  .card-use{display:none}
+  .g-fresh .card-meta{display:none}
 }
 @media (prefers-reduced-motion: reduce){ .card{transition:none} .card:hover{transform:none} }
 
@@ -246,7 +276,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
       <h1>Saison<span class="b-obst">obst</span> <span class="b-gem">&amp;&nbsp;<b>-gemüse</b></span></h1>
       <p>Was bei dir gerade reift und wächst, was aus dem regionalen Lager kommt und was importiert wird.</p>
     </div>
-    <div class="search">
+    <div class="search" id="ortsuche">
       <label for="q">Dein Ort</label>
       <div class="search-row">
         <input id="q" type="text" autocomplete="off" spellcheck="false" placeholder="Ort, PLZ oder Koordinaten (48.1, 11.6)"
@@ -262,7 +292,7 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
   <nav class="months" id="months" aria-label="Monat wählen"></nav>
 
   <section class="summary">
-    <h2 id="title">…</h2>
+    <div class="title-row"><h2 id="title">…</h2><button type="button" class="linkbtn" id="ortbtn" aria-expanded="false" aria-controls="ortsuche">Ort ändern</button></div>
     <div class="counts num" id="counts"></div>
   </section>
   <div class="toolbar">
@@ -963,7 +993,15 @@ if(!embedded&&navigator.geolocation){
 }
 
 /* ---------- Rendering ---------- */
-function setLocation(loc){state.loc=loc;store.set("saisonobst.loc",{...loc,example:false});render();}
+function setLocation(loc){state.loc=loc;store.set("saisonobst.loc",{...loc,example:false});ortOffen(false);render();}
+/* Am Handy ist das Ortsfeld bei gespeichertem Ort eingeklappt, „Ort ändern“ klappt es auf */
+function ortOffen(auf){$("ortsuche").classList.toggle("open",auf);const b=$("ortbtn");b.setAttribute("aria-expanded",auf);b.textContent=auf?"Schließen":"Ort ändern";}
+$("ortbtn").addEventListener("click",()=>{const auf=!$("ortsuche").classList.contains("open");ortOffen(auf);if(auf){q.value="";q.focus();}});
+/* Zähler unter dem Titel springen sofort zur Gruppe (kein weiches Scrollen: bei mehreren Bildschirmlängen dauert das zu lange);
+   der Fokus wandert mit, damit Tastatur und Screenreader dort weitermachen */
+$("counts").addEventListener("click",e=>{const b=e.target.closest("button[data-go]");if(!b)return;const g=document.getElementById(b.dataset.go);if(!g)return;
+  g.scrollIntoView({block:"start"});
+  const h=g.querySelector("h3");if(h)h.focus({preventScroll:true});});
 function windows(){return FRUITS.map(f=>fruitWindow(f,state.loc));}
 
 function renderMonths(){
@@ -1007,7 +1045,7 @@ function card(w,mode){
     <span class="strip" aria-hidden="true">${strip12(w)}</span></button>`;
 }
 function group(title,key,list,mode,emptyText){
-  return `<section class="group"><div class="group-head"><span class="key ${key}"></span><h3>${title}</h3><span class="count num">${list.length}</span></div>
+  return `<section class="group g-${mode}" id="g-${mode}"><div class="group-head"><span class="key ${key}"></span><h3 tabindex="-1">${title}</h3><span class="count num">${list.length}</span></div>
   ${list.length?`<div class="cards">${list.map(w=>card(w,mode)).join("")}</div>`:`<p class="empty">${emptyText}</p>`}</section>`;
 }
 
@@ -1028,7 +1066,8 @@ function render(){
   stored.sort((a,b)=>a.f.n.localeCompare(b.f.n,"de"));
   const isToday=m===TODAY_M;
   $("title").textContent=`${MONTHS[m]} in ${loc.name}`;
-  $("counts").innerHTML=`<span><b>${fresh.length}</b> erntefrisch</span>${glass.length?`<span><b>${glass.length}</b> aus dem Gewächshaus</span>`:""}<span><b>${stored.length}</b> aus dem Lager</span><span><b>${soon.length}</b> ab ${MONTHS[nm]}</span>${loc.example?'<span>Beispielort, gib oben deinen Ort ein</span>':""}`;
+  document.body.classList.toggle("has-loc",!loc.example);
+  $("counts").innerHTML=`<button type="button" data-go="g-fresh"><b>${fresh.length}</b> erntefrisch</button>${glass.length?`<button type="button" data-go="g-glass"><b>${glass.length}</b> aus dem Gewächshaus</button>`:""}<button type="button" data-go="g-store"><b>${stored.length}</b> aus dem Lager</button><button type="button" data-go="g-soon"><b>${soon.length}</b> ab ${MONTHS[nm]}</button>${loc.example?'<span>Beispielort, gib oben deinen Ort ein</span>':""}`;
 
   $("main").innerHTML=
     group("Erntefrisch aus der Region","c-peak",fresh.map(x=>x.w),"fresh","In diesem Monat wird bei dir in den gewählten Kategorien nichts geerntet.")+

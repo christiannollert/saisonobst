@@ -94,6 +94,18 @@ button,input,select{font:inherit;color:inherit}
 .chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:.92rem}
 .chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}
 .filters.all .chip[aria-pressed="true"]{border-color:var(--line);background:var(--surface);font-weight:400}
+/* Sortensuche: steht vorn in der Leiste, damit das Feld beim Tippen nicht springt, wenn Schalter und Kategorien verschwinden */
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.sorte{position:relative;display:flex;align-items:center;flex:0 1 17rem;min-width:12rem}
+.sorte svg{position:absolute;left:13px;width:16px;height:16px;color:var(--muted);pointer-events:none}
+.sorte input{width:100%;min-width:0;padding:9px 38px 9px 36px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);appearance:none;-webkit-appearance:none}
+.sorte input::-webkit-search-cancel-button{display:none}
+.sorte input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.sorte button{position:absolute;right:4px;width:32px;height:32px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:1.25rem;line-height:1;cursor:pointer}
+.sorte button:hover{color:var(--ink)}
+.sorte input:placeholder-shown~button{display:none}
+.suche .kind,.suche .filters{display:none}
+.key.c-such{background:var(--accent)}
 
 /* Haupt-Layout */
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start;padding-top:12px}
@@ -233,6 +245,9 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
   .filters{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
   .filters::-webkit-scrollbar{display:none}
   .chip{flex:none}
+  .sorte{flex:none}
+  .sorte input{padding-block:10px;scroll-margin-top:10px}
+  .sorte button{width:40px;height:40px;right:2px}
   /* Sorten als kompakte Zeilen: Foto links, Name und Status daneben, Jahresstreifen darunter */
   .cards{grid-template-columns:1fr;gap:6px}
   .card,.card:has(>.card-img){grid-template-columns:44px minmax(0,1fr) auto;gap:3px 10px;padding:8px 10px}
@@ -296,6 +311,13 @@ dialog::backdrop{background:rgba(10,15,12,.45)}
     <div class="counts num" id="counts"></div>
   </section>
   <div class="toolbar">
+    <div class="sorte">
+      <label class="vh" for="sq">Sorte suchen</label>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="sq" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Sorte suchen, z. B. Spargel">
+      <button type="button" id="sqx" aria-label="Sortensuche leeren">×</button>
+      <span class="vh" id="sqstatus" role="status"></span>
+    </div>
     <div class="kind" id="kind" role="group" aria-label="Obst oder Gemüse anzeigen"></div>
     <div class="filters" id="filters" role="group" aria-label="Kategorien filtern"></div>
   </div>
@@ -902,10 +924,56 @@ function halfStatus(w,m,h){
 }
 function monthCell(w,m){const c=monthCount(w,m);if(c.peak>=6)return "peak";if(c.harvest>=12)return "season";if(c.harvest>=4)return "edge";if(c.glass>=10)return "glass";if(c.store>=10)return "store";return "";}
 
+/* ---------- Sortensuche ---------- */
+// Wo eine Art im Monat m steht. Dieselbe Einteilung nutzen die Liste und die Treffer der Sortensuche.
+function modus(w,m){
+  if(!w.regional)return "import";
+  const c=monthCount(w,m);
+  return c.harvest>=5?"fresh":c.glass>=8?"glass":c.store>=5?"store":"aus";
+}
+// Für Treffer ohne regionale Ware im Monat m: der nächste Beginn, Gewächshaus oder Freiland, je nachdem was früher kommt.
+function wiederAb(w,m){
+  const bis=x=>mod(x-CUM[m]);
+  if(w.gh&&(w.s==null||bis(w.gh[0])<bis(w.s)))return "Wieder ab "+fmt(w.gh[0])+" (Gewächshaus)";
+  return "Wieder ab "+fmt(w.s);
+}
+// Andere Namen derselben Art (Österreich, Schweiz, Umgangssprache, häufige Schreibweisen). Nur für die Suche, angezeigt wird der Name aus FRUITS.
+const ALIAS={
+ moehre:"Karotte, Rüebli, Mohrrübe, Gelbe Rübe", kartoffel:"Erdapfel, Erdäpfel, Grundbirne", tomate:"Paradeiser",
+ blumenkohl:"Karfiol", rosenkohl:"Kohlsprossen", weisskohl:"Weißkraut, Kabis, Kraut", rotkohl:"Blaukraut, Rotkraut, Rotkabis",
+ wirsing:"Wirz, Welschkraut", gruenkohl:"Federkohl, Braunkohl", steckruebe:"Kohlrübe, Wruke", pakchoi:"Pak Choy, Senfkohl",
+ feldsalat:"Vogerlsalat, Nüsslisalat, Rapunzel, Ackersalat", kopfsalat:"Häuptelsalat, Buttersalat", eisberg:"Eissalat",
+ rucola:"Rauke", mangold:"Krautstiel", rotebete:"Rote Beete, Rote Rübe, Rande", meerrettich:"Kren", rettich:"Radi",
+ sellerie:"Zeller", staudensellerie:"Stangensellerie, Bleichsellerie", fruehlingszwiebel:"Lauchzwiebel, Jungzwiebel",
+ brokkoli:"Broccoli", zucchini:"Zucchetti", mais:"Kukuruz", paprika:"Peperoni", aubergine:"Melanzani",
+ bohne:"Fisole, Buschbohne, Stangenbohne", dickebohne:"Ackerbohne, Saubohne, Puffbohne", erbse:"Kaiserschote, Kefe",
+ suesskartoffel:"Batate", zwetschge:"Zwetschke, Zwetsche", reneklode:"Reineclaude, Ringlotte", sauerkirsche:"Weichsel",
+ rjoh:"Ribisel", sjoh:"Schwarze Ribisel, Cassis", heidel:"Blaubeere, Schwarzbeere", holunder:"Holler, Fliederbeere",
+ kastanie:"Maroni, Edelkastanie", walnuss:"Baumnuss", orange:"Apfelsine", mandarine:"Satsuma", passion:"Maracuja",
+ litschi:"Lychee", kaki:"Persimone, Sharon", melone:"Honigmelone", kiwibeere:"Mini-Kiwi", traube:"Tafeltraube"
+};
+let SUCHINDEX=null;
+// Liefert die passenden Arten, beste Treffer zuerst: Namensanfang, Wortanfang im Namen, Wortteil im Namen, anderer Name, Sortenname.
+function sucheSorten(q){
+  const qn=norm(q);if(!qn)return [];
+  SUCHINDEX=SUCHINDEX||FRUITS.map(f=>({f,n:norm(f.n),a:(ALIAS[f.id]||"").split(",").map(norm).filter(Boolean),so:norm(f.so||"")}));
+  // Mehrzahl: „Tomaten“ soll „Tomate“ finden, „Nüsse“ die Walnuss. Umlaute gleicht norm schon an.
+  const formen=[qn,...["en","n","e","s","se"].map(x=>qn.endsWith(x)?qn.slice(0,-x.length):"").filter(x=>x.length>=4)];
+  const rang=x=>{let r=9;for(const t of formen){const lang=t.length>=3;
+    if(x.n.startsWith(t))r=Math.min(r,0);
+    else if((" "+x.n).includes(" "+t))r=Math.min(r,1);
+    else if(lang&&x.n.includes(t))r=Math.min(r,2);
+    else if(x.a.some(a=>(" "+a).includes(" "+t)))r=Math.min(r,3);
+    else if(lang&&x.a.some(a=>a.includes(t)))r=Math.min(r,4);
+    else if(lang&&(" "+x.so).includes(" "+t))r=Math.min(r,5);
+  }return r;};
+  return SUCHINDEX.map(x=>({f:x.f,r:rang(x)})).filter(x=>x.r<9).sort((a,b)=>a.r-b.r||a.f.n.localeCompare(b.f.n,"de")).map(x=>x.f);
+}
+
 /* ---------- Zustand ---------- */
 const now=new Date();
 const TODAY_M=now.getMonth();
-const state={loc:null,month:TODAY_M,kind:"alle",cats:new Set(KINDS.alle)};
+const state={loc:null,month:TODAY_M,kind:"alle",cats:new Set(KINDS.alle),such:""};
 const DEFAULT={...byName["Frankfurt am Main"],example:true};
 
 function makeLoc(p,extra){
@@ -999,9 +1067,18 @@ function ortOffen(auf){$("ortsuche").classList.toggle("open",auf);const b=$("ort
 $("ortbtn").addEventListener("click",()=>{const auf=!$("ortsuche").classList.contains("open");ortOffen(auf);if(auf){q.value="";q.focus();}});
 /* Zähler unter dem Titel springen sofort zur Gruppe (kein weiches Scrollen: bei mehreren Bildschirmlängen dauert das zu lange);
    der Fokus wandert mit, damit Tastatur und Screenreader dort weitermachen */
-$("counts").addEventListener("click",e=>{const b=e.target.closest("button[data-go]");if(!b)return;const g=document.getElementById(b.dataset.go);if(!g)return;
+$("counts").addEventListener("click",e=>{const b=e.target.closest("button[data-go]");if(!b)return;if(state.such)sucheSetzen("");const g=document.getElementById(b.dataset.go);if(!g)return;
   g.scrollIntoView({block:"start"});
   const h=g.querySelector("h3");if(h)h.focus({preventScroll:true});});
+/* ---------- Sortensuche: Bedienung ---------- */
+const sq=$("sq");
+function sucheSetzen(v){state.such=v;if(sq.value!==v)sq.value=v;render(true);}
+sq.addEventListener("input",()=>sucheSetzen(sq.value));
+sq.addEventListener("keydown",e=>{if(e.key==="Enter")sq.blur();else if(e.key==="Escape"&&sq.value){e.preventDefault();sucheSetzen("");}});
+// Am Handy verdeckt die Tastatur die halbe Seite: Feld nach oben holen, damit die Treffer darunter sichtbar bleiben
+sq.addEventListener("focus",()=>{if(matchMedia("(max-width: 560px)").matches)sq.scrollIntoView({block:"start"});});
+$("sqx").addEventListener("click",()=>{sucheSetzen("");sq.focus();});
+
 function windows(){return FRUITS.map(f=>fruitWindow(f,state.loc));}
 
 function renderMonths(){
@@ -1033,33 +1110,35 @@ function statusPill(w,m){
   return '<span class="pill season">Erntezeit</span>';
 }
 function seasonText(w){return w.y?"ganzjährig":w.glassOnly?"nur aus dem Gewächshaus":fmt(w.s)+" – "+fmt(w.e);}
-function strip12(w){return MONTHS.map((_,m)=>{const s=monthCell(w,m);return `<i class="${s?"c-"+s:""}${m===state.month?" sel":""}"></i>`;}).join("");}
+function strip12(w,leer){return MONTHS.map((_,m)=>{const s=leer?"":monthCell(w,m);return `<i class="${s?"c-"+s:""}${m===state.month?" sel":""}"></i>`;}).join("");}
 function card(w,mode){
   const m=state.month;
-  let meta=mode==="store"?"Lagerware bis "+fmt(w.e+w.st):mode==="soon"?"Ernte ab "+fmt(w.s):mode==="glass"?(w.glassOnly?"Unter Glas: "+fmt(w.gh[0])+" – "+fmt(w.gh[1]):"Freiland: "+seasonText(w)):"Ernte: "+seasonText(w);
+  let meta=mode==="store"?"Lagerware bis "+fmt(w.e+w.st):mode==="soon"?"Ernte ab "+fmt(w.s):mode==="glass"?(w.glassOnly?"Unter Glas: "+fmt(w.gh[0])+" – "+fmt(w.gh[1]):"Freiland: "+seasonText(w)):mode==="aus"?wiederAb(w,m):mode==="import"?"Wächst bei dir nicht im Freiland":"Ernte: "+seasonText(w);
   return `<button type="button" class="card" data-id="${w.f.id}">
     <span class="card-name">${esc(w.f.n)}</span>${BILDER[w.f.id]?`<img class="card-img" src="img/${w.f.id}.jpg" alt="" width="56" height="56" loading="lazy" decoding="async" onerror="this.remove()">`:""}
-    <span class="pills">${mode==="soon"?'<span class="pill">bald</span>':statusPill(w,m)}${w.edge?'<span class="pill edge">Grenzlage</span>':""}</span>
+    <span class="pills">${mode==="soon"?'<span class="pill">bald</span>':mode==="aus"?'<span class="pill">keine Saison</span>':mode==="import"?'<span class="pill">Import</span>':statusPill(w,m)}${w.edge&&mode!=="aus"?'<span class="pill edge">Grenzlage</span>':""}</span>
     <span class="card-meta">${meta}</span>
     <span class="card-use"><span class="use-lbl">Verwendung</span> ${useText(w.f.id)}</span>
-    <span class="strip" aria-hidden="true">${strip12(w)}</span></button>`;
+    <span class="strip" aria-hidden="true">${strip12(w,mode==="import")}</span></button>`;
 }
 function group(title,key,list,mode,emptyText){
   return `<section class="group g-${mode}" id="g-${mode}"><div class="group-head"><span class="key ${key}"></span><h3 tabindex="-1">${title}</h3><span class="count num">${list.length}</span></div>
-  ${list.length?`<div class="cards">${list.map(w=>card(w,mode)).join("")}</div>`:`<p class="empty">${emptyText}</p>`}</section>`;
+  ${list.length?`<div class="cards">${list.map(w=>card(w,mode==="such"?modus(w,state.month):mode)).join("")}</div>`:`<p class="empty">${emptyText}</p>`}</section>`;
 }
 
-function render(){
+// nurListe: beim Tippen in der Sortensuche ändert sich nur die Liste, Seitenleiste und Kalender bleiben stehen
+function render(nurListe){
   const loc=state.loc,m=state.month,W=windows();
   const vis=W.filter(w=>state.cats.has(w.f.k));
   const fresh=[],glass=[],stored=[],soon=[],foreign=[];
   const nm=(m+1)%12;
   for(const w of vis){
-    if(!w.regional){foreign.push(w);continue;}
+    const mo=modus(w,m);
+    if(mo==="import"){foreign.push(w);continue;}
     const c=monthCount(w,m);
-    if(c.harvest>=5)fresh.push({w,c});
-    else if(c.glass>=8)glass.push(w);
-    else if(c.store>=5)stored.push(w);
+    if(mo==="fresh")fresh.push({w,c});
+    else if(mo==="glass")glass.push(w);
+    else if(mo==="store")stored.push(w);
     if(c.harvest<5&&monthCount(w,nm).harvest>=5)soon.push(w);
   }
   fresh.sort((a,b)=>(b.c.peak>0)-(a.c.peak>0)||b.c.harvest-a.c.harvest||a.w.f.n.localeCompare(b.w.f.n,"de"));
@@ -1069,7 +1148,13 @@ function render(){
   document.body.classList.toggle("has-loc",!loc.example);
   $("counts").innerHTML=`<button type="button" data-go="g-fresh"><b>${fresh.length}</b> erntefrisch</button>${glass.length?`<button type="button" data-go="g-glass"><b>${glass.length}</b> aus dem Gewächshaus</button>`:""}<button type="button" data-go="g-store"><b>${stored.length}</b> aus dem Lager</button><button type="button" data-go="g-soon"><b>${soon.length}</b> ab ${MONTHS[nm]}</button>${loc.example?'<span>Beispielort, gib oben deinen Ort ein</span>':""}`;
 
-  $("main").innerHTML=
+  // Sortensuche: solange etwas im Feld steht, ersetzen die Treffer aus allen Arten die Monatsliste
+  const such=state.such.trim();
+  let hits=[];
+  if(such){const nachId=new Map(W.map(w=>[w.f.id,w]));hits=sucheSorten(such).map(f=>nachId.get(f.id));}
+  document.body.classList.toggle("suche",!!such);
+  $("sqstatus").textContent=such?(hits.length?hits.length+" Treffer":"Keine Treffer"):"";
+  $("main").innerHTML=such?group(`Treffer für „${esc(such)}“`,"c-such",hits,"such",`Keine Art und keine Sorte mit diesem Namen gefunden. Die Suche kennt ${FRUITS.length} Obst- und Gemüsearten.`):
     group("Erntefrisch aus der Region","c-peak",fresh.map(x=>x.w),"fresh","In diesem Monat wird bei dir in den gewählten Kategorien nichts geerntet.")+
     (glass.length?group("Aus Gewächshaus und Folientunnel","c-glass",glass,"glass",""):"")+
     group("Aus regionalem Lager","c-store",stored,"store","Keine regionale Lagerware in den gewählten Kategorien.")+
@@ -1078,7 +1163,7 @@ function render(){
      <p class="empty" style="font-size:.92rem">Diese Arten kommen an deinem Standort nur als Importware in den Handel. Antippen zeigt, wann sie im Anbaugebiet Saison haben.</p>
      <div class="tags">${foreign.map(w=>`<button type="button" class="tag" data-id="${w.f.id}">${esc(w.f.n)}</button>`).join("")}</div></section>`;
 
-  renderProfile(W);renderRegions();renderCalendar(W);renderMonths();renderFilters();
+  if(!nurListe){renderProfile(W);renderRegions();renderCalendar(W);renderMonths();renderFilters();}
 }
 
 function renderProfile(W){
